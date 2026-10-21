@@ -67,7 +67,7 @@ TVs that don't run Google TV or Android TV (Samsung, LG and others): the way is 
 
 ## The code
 
-- Java 8 language level, minSdk 31 (Android 12), targetSdk 33. No Gradle, no libraries: only the Android SDK.
+- Java 8 language level, minSdk 30 (Android 11), targetSdk 33. No Gradle, no libraries: only the Android SDK.
 - The home screen is drawn by hand on one Canvas (`HomeView`); the glass and the sky are AGSL shaders (`Shaders`,
   Android 13+, with a fallback for 12). Keep it at 60 fps: no allocations in `onDraw`, no work on the UI thread.
 - `HomeMode` runs every switch as a background job (`ModeJob`) in the main process; the UI is in the `:home`
@@ -84,3 +84,7 @@ TVs that don't run Google TV or Android TV (Samsung, LG and others): the way is 
   *Original* can bring it back.
 - Don't change the TV's picture, sound, network or account settings.
 - Keep the way back working: the *Original* mode and the watchdog.
+
+## TCL performance branch
+
+README.md documents this branch; README.upstream.md preserves upstream instructions. Private configuration, signing keys, generated output and personal APKs must remain local. Historical benchmarks are before/after local optimization, not a comparison to current upstream. The football tab is currently Flamengo-specific. Do not disable debugging on the owner's TV: they explicitly requested that it remain on.

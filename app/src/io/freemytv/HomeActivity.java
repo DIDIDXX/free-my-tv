@@ -41,6 +41,7 @@ public class HomeActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        if (android.os.Build.VERSION.SDK_INT <= 30) LegacyHomeBridge.ensureServiceEnabled(this);
         if (home != null) home.resume();
     }
 

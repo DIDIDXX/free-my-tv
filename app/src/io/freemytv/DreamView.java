@@ -66,7 +66,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
             this.image = image;
             this.frost = frost;
             shader = new BitmapShader(frost, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-            shader.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+            if (android.os.Build.VERSION.SDK_INT >= 33) shader.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
             this.lightCaption = lightCaption;
             this.lightClock = lightClock;
             zoomIn = n % 2 == 0;
@@ -149,6 +149,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
         scene.applyPalette();
         content.setUseCompositingLayer(true, null);
         try {
+            if (android.os.Build.VERSION.SDK_INT < 33) throw new UnsupportedOperationException("Android 11/12: standard clock");
             glassShader = new RuntimeShader(Shaders.GLASS_TEXT);
             glassPaint.setShader(glassShader);
         } catch (RuntimeException | LinkageError e) {   // Android 12: no AGSL
@@ -598,7 +599,7 @@ final class DreamView extends View implements Choreographer.FrameCallback, HomeD
 
     private static BitmapShader nearest(Bitmap b) {
         BitmapShader s = new BitmapShader(b, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        s.setFilterMode(BitmapShader.FILTER_MODE_NEAREST);
+        if (android.os.Build.VERSION.SDK_INT >= 33) s.setFilterMode(BitmapShader.FILTER_MODE_NEAREST);
         return s;
     }
 

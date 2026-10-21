@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.freemytv"
     android:versionCode="1"
-    android:versionName="1.0">
+    android:versionName="1.0-tcl11">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- After the TV boots (and after a TV update), checks that Free My TV mode is still as you left it. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <!-- Android 11+: without this list the app can't "see" the other apps (getLeanbackLaunchIntentForPackage
          returns null). The shelf and streaming apps, the live TV apps and, through the <intent>, every TV app
@@ -102,6 +103,11 @@
             </intent-filter>
         </service>
 
+        <service android:name=".LegacyHomeBridge" android:process=":home" android:exported="true"
+            android:label="Free My TV · botão Home" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/tcl_home_bridge" />
+        </service>
         <!-- The switches, as background jobs in the main process. -->
         <service
             android:name=".ModeJob"

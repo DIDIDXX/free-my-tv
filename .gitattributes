@@ -1,0 +1,2 @@
+# Preserve raw Android diagnostic output exactly, including its whitespace.
+benchmarks/tcl-android11/raw/*.txt -whitespace

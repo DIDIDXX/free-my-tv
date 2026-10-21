@@ -80,21 +80,25 @@ final class HomeMode {
 
     /** Asks the main process to switch (the settings screen calls this). */
     static void request(Context c, String mode) {
+        if (Build.VERSION.SDK_INT <= 30) { LegacyHomeBridge.select(c, FREE.equals(mode)); return; }
         ModeJob.schedule(c, ModeJob.APPLY, mode, 0);
     }
 
     /** Our home screen crashed 3 times in 5 minutes: give the home screen back to the TV's own (asked by :home). */
     static void requestRevertHome(Context c) {
+        if (Build.VERSION.SDK_INT <= 30) { LegacyHomeBridge.select(c, false); return; }
         ModeJob.schedule(c, ModeJob.REVERT, null, 0);
     }
 
     /** After the TV boots (and after a TV update): wait for the system to settle and check Free My TV mode. */
     static void bootCheck(Context c) {
+        if (Build.VERSION.SDK_INT <= 30) { LegacyHomeBridge.ensureServiceEnabled(c); return; }
         ModeJob.schedule(c, ModeJob.VERIFY, null, 45_000);
     }
 
     /** After an update of this app: complete Free My TV mode if anything is missing. */
     static void verify(Context c) {
+        if (Build.VERSION.SDK_INT <= 30) { LegacyHomeBridge.ensureServiceEnabled(c); return; }
         ModeJob.schedule(c, ModeJob.VERIFY, null, 0);
     }
 
@@ -246,6 +250,7 @@ final class HomeMode {
      * things back on) and after an update of this app.
      */
     static void verifyNow(Context app) {
+        if (Build.VERSION.SDK_INT <= 30) return;
         synchronized (RUN) {
             JSONObject s = state(app);
             String fingerprint = Build.FINGERPRINT;

@@ -39,6 +39,7 @@ final class Scene {
 
     Scene() {
         try {
+            if (android.os.Build.VERSION.SDK_INT < 33) throw new UnsupportedOperationException("Android 11/12: gradient renderer");
             aurora = new RuntimeShader(Shaders.AURORA);
             glass = new RuntimeShader(Shaders.GLASS);
             liquid = new RuntimeShader(Shaders.LIQUID);
@@ -119,10 +120,10 @@ final class Scene {
 
     /** Photo transition: both photos in the glass, blended by setGlassMix (0 = the first one). */
     void setGlassImages(int[] from, int[] to) {
+        if (liquid == null || from == null) return;
         imageGlass = true;
         glassA = fill(glassA, from);
         if (to != null) glassB = fill(glassB, to);
-        if (liquid == null) return;
         glassShaderA = linear(glassA);
         liquid.setInputShader("imageA", glassShaderA);
         liquid.setInputShader("imageB", to != null ? linear(glassB) : glassShaderA);
@@ -149,7 +150,7 @@ final class Scene {
 
     private static BitmapShader linear(Bitmap b) {
         BitmapShader s = new BitmapShader(b, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        s.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+        if (android.os.Build.VERSION.SDK_INT >= 33) s.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
         return s;
     }
 
@@ -179,12 +180,12 @@ final class Scene {
 
     /** The glass now reads the blurred background image (Backdrop.FW × FH, ARGB). */
     void setFrost(int[] pixels) {
+        if (glass == null || pixels == null) return;
         if (frostImage == null) frostImage = Bitmap.createBitmap(Backdrop.FW, Backdrop.FH, Bitmap.Config.ARGB_8888);
         frostImage.setPixels(pixels, 0, Backdrop.FW, 0, 0, Backdrop.FW, Backdrop.FH);
         imageFrost = true;
-        if (glass == null) return;
         BitmapShader s = new BitmapShader(frostImage, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        s.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
+        if (android.os.Build.VERSION.SDK_INT >= 33) s.setFilterMode(BitmapShader.FILTER_MODE_LINEAR);
         glass.setInputShader("frost", s);
         setFrostScale();
     }

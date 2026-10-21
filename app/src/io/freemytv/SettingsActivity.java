@@ -110,12 +110,14 @@ public class SettingsActivity extends Activity {
         private JSONObject state = new JSONObject(), recs = new JSONObject();
         private boolean hasKey;
         private int screen = MAIN, focus;
-        private boolean running, okDown, backDown;
+        private boolean running, frameScheduled, okDown, backDown;
         private long startedAt, lastNanos, pendingAt, lastSky;
         private int w, h;
         private float k = 1;
         private Paint title, subtitle, version, rowLabel, rowValue, rowSub, header, cellLabel, cellValue, warn, spinner, white, shadow;
         private TextPaint notice;
+        private android.graphics.Bitmap mainRowShadow, choiceRowShadow;
+        private final RectF shadowDst = new RectF();
 
         private final Runnable poll = new Runnable() {
             @Override public void run() {
@@ -146,21 +148,26 @@ public class SettingsActivity extends Activity {
             startedAt = SystemClock.uptimeMillis();
             lastNanos = 0;
             handler.post(poll);
-            Choreographer.getInstance().postFrameCallback(this);
+            scheduleFrame();
         }
 
         void pause() {
             running = false;
+            frameScheduled = false;
             handler.removeCallbacks(poll);
             Choreographer.getInstance().removeFrameCallback(this);
         }
 
-        @Override public void doFrame(long frameTimeNanos) {
-            if (!running) return;
-            boolean moving = busy();
-            for (Spring s : pop) moving |= !s.settled();
-            if (moving || SystemClock.uptimeMillis() - lastSky >= 100) invalidate();
+        private void scheduleFrame() {
+            if (!running || frameScheduled) return;
+            frameScheduled = true;
             Choreographer.getInstance().postFrameCallback(this);
+        }
+
+        @Override public void doFrame(long frameTimeNanos) {
+            frameScheduled = false;
+            if (!running) return;
+            invalidate();
         }
 
         @Override protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
@@ -191,8 +198,26 @@ public class SettingsActivity extends Activity {
             spinner.setStrokeWidth(3.5f * k);
             white = new Paint(Paint.ANTI_ALIAS_FLAG);
             white.setColor(0xFFF5F5F7);
-            shadow = new Paint(Paint.ANTI_ALIAS_FLAG);
-            shadow.setMaskFilter(new BlurMaskFilter(22 * k, BlurMaskFilter.Blur.NORMAL));
+            shadow = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+            mainRowShadow = makeRowShadow((LIST_R - LIST_X) * k, ROW_H * k, 18 * k, 22 * k);
+            choiceRowShadow = makeRowShadow((LIST_R - LIST_X) * k, CHOICE_H * k, 18 * k, 22 * k);
+        }
+
+        private static android.graphics.Bitmap makeRowShadow(float w, float h, float r, float blur) {
+            float scale = 0.5f;
+            float pad = (float) Math.ceil(blur * 2f);
+            int bw = Math.max(4, Math.round((w + pad * 2) * scale));
+            int bh = Math.max(4, Math.round((h + pad * 2) * scale));
+            android.graphics.Bitmap sw = android.graphics.Bitmap.createBitmap(bw, bh, android.graphics.Bitmap.Config.ARGB_8888);
+            Canvas sc = new Canvas(sw);
+            sc.scale(scale, scale);
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p.setColor(0xFF000000);
+            p.setMaskFilter(new BlurMaskFilter(Math.max(1f, blur), BlurMaskFilter.Blur.NORMAL));
+            sc.drawRoundRect(pad, pad, pad + w, pad + h, r, r, p);
+            android.graphics.Bitmap hw = sw.copy(android.graphics.Bitmap.Config.HARDWARE, false);
+            if (hw != null) { sw.recycle(); return hw; }
+            return sw;
         }
 
         private boolean busy() {
@@ -200,6 +225,7 @@ public class SettingsActivity extends Activity {
         }
 
         private boolean freeActive() {
+            if (android.os.Build.VERSION.SDK_INT <= 30) return LegacyHomeBridge.chosen(getContext());
             return HomeMode.FREE.equals(state.optString("mode")) && !state.optBoolean("homeReverted");
         }
 
@@ -232,12 +258,15 @@ public class SettingsActivity extends Activity {
             c.drawText(versionName(getContext()), cx, 704 * k, version);
 
             if (screen == MAIN) drawMain(c, seconds); else drawChoice(c);
+            boolean moving = busy();
+            for (int i = 0; i < rowCount(); i++) moving |= !pop[i].settled();
+            if (moving) scheduleFrame(); else lastNanos = 0;
         }
 
         private void drawMain(Canvas c, float seconds) {
             boolean working = busy();
             String busyText = state.optString("busy");
-            String mode = freeActive() ? "Free My TV" : Ui.tr("Original", "Original");
+            String mode = freeActive() ? "Free My TV" : "AT4K";
             String[] labels = {Ui.tr("Início", "Home Screen"), Ui.tr("Tela de Descanso", "Screensaver"), Ui.tr("Ajustes da TV", "TV Settings")};
             String[] values = {working ? "" : mode, Ui.tr("Ver agora", "Preview"), ""};
             for (int i = 0; i < 3; i++) {
@@ -277,7 +306,7 @@ public class SettingsActivity extends Activity {
                 c.drawText(TextUtils.ellipsize(error, new TextPaint(warn), 760 * k, TextUtils.TruncateAt.END).toString(), LIST_X * k + 30 * k, y, warn);
                 y += 46 * k;
             }
-            y = drawComparison(c, y);
+            if (android.os.Build.VERSION.SDK_INT > 30) y = drawComparison(c, y);
             y = drawRecs(c, y + 26 * k);
             drawNotices(c, y + 40 * k);
         }
@@ -289,7 +318,7 @@ public class SettingsActivity extends Activity {
             String line;
             String error = recs.optString("error");
             int count = recs.optInt("count");
-            if (!hasKey) line = Ui.tr("Sem chave do TMDB: veja o README (config.properties).", "No TMDB key: see the README (config.properties).");
+            if (!hasKey) line = Ui.tr("Sugestões de filmes ainda não configuradas.", "Movie suggestions are not configured yet.");
             else if (!error.isEmpty()) line = Ui.tr("Erro: ", "Error: ") + error + ".";
             else if (count > 0) line = Ui.tr("Ligadas · " + count + " títulos nos apps da TV, 3 novos a cada hora.",
                     "On · " + count + " titles from the TV's apps, 3 new ones every hour.");
@@ -310,10 +339,13 @@ public class SettingsActivity extends Activity {
                 float cx = rowRect.centerX(), cy = rowRect.centerY();
                 tmp.set(cx - rowRect.width() * s / 2, cy - rowRect.height() * s / 2, cx + rowRect.width() * s / 2, cy + rowRect.height() * s / 2);
                 float r = 18 * k * s;
-                tmp.offset(0, 10 * k * f);
-                shadow.setColor(Ui.alpha(0xFF000000, 0.4f * f));
-                c.drawRoundRect(tmp, r, r, shadow);
-                tmp.offset(0, -10 * k * f);
+                android.graphics.Bitmap sb = screen == MAIN ? mainRowShadow : choiceRowShadow;
+                if (sb != null) {
+                    float pad = (float) Math.ceil(22 * k * 2f) * s;
+                    shadowDst.set(tmp.left - pad, tmp.top + 10 * k * f - pad, tmp.right + pad, tmp.bottom + 10 * k * f + pad);
+                    shadow.setAlpha(Math.round(255 * 0.4f * f));
+                    c.drawBitmap(sb, null, shadowDst, shadow);
+                }
                 white.setAlpha(Math.round(255 * f));
                 c.drawRoundRect(tmp, r, r, white);
                 rowRect.set(tmp);
@@ -361,8 +393,8 @@ public class SettingsActivity extends Activity {
         private void drawChoice(Canvas c) {
             Paint heading = Ui.text(Ui.displaySemibold, 34 * k, 0xFFFFFFFF);
             c.drawText(Ui.tr("Início", "Home Screen"), LIST_X * k + 30 * k, (LIST_TOP - 24) * k, heading);
-            String[][] options = {{"Free My TV", Ui.tr("Sem anúncios, com a tela de descanso nova", "No ads, with the new screensaver")},
-                    {"Original", Ui.tr("O Início de fábrica da TV", "The TV's factory home screen")}};
+            String[][] options = {{"Free My TV", Ui.tr("Tela inicial sem anúncios", "Ad-free home screen")},
+                    {"AT4K", Ui.tr("Voltar para a tela anterior", "Return to the previous home screen")}};
             int current = freeActive() ? 0 : 1;
             for (int i = 0; i < 2; i++) {
                 float y = (LIST_TOP + 20 + i * (CHOICE_H + ROW_GAP)) * k;
@@ -378,8 +410,8 @@ public class SettingsActivity extends Activity {
                 }
             }
             Paint hint = Ui.text(Ui.regular, 23 * k, 0x8CFFFFFF);
-            c.drawText(Ui.tr("A troca leva uns segundos e a tela pisca nas medições.",
-                    "Switching takes a few seconds; the screen blinks while it measures."), LIST_X * k + 30 * k,
+            c.drawText(Ui.tr("Você pode voltar ao AT4K a qualquer momento.",
+                    "You can return to AT4K at any time."), LIST_X * k + 30 * k,
                     (LIST_TOP + 20 + 2 * (CHOICE_H + ROW_GAP) + 40) * k, hint);
         }
 
@@ -462,7 +494,7 @@ public class SettingsActivity extends Activity {
                 boolean wantFree = focus == 0;
                 if (wantFree != freeActive() && !busy()) {
                     HomeMode.request(c, wantFree ? HomeMode.FREE : HomeMode.ORIGINAL);
-                    pendingAt = SystemClock.uptimeMillis();
+                    pendingAt = android.os.Build.VERSION.SDK_INT <= 30 ? 0 : SystemClock.uptimeMillis();
                 }
                 screen = MAIN;
                 focus = 0;

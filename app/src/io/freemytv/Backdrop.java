@@ -45,8 +45,8 @@ final class Backdrop {
         this.lightGlass = lightGlass;
         this.nightFrost = night;
         this.nightGlass = nightGlass;
-        lightImage = light == null ? null : Bitmap.createBitmap(light, FW, FH, Bitmap.Config.ARGB_8888);
-        nightImage = night == null ? null : Bitmap.createBitmap(night, FW, FH, Bitmap.Config.ARGB_8888);
+        lightImage = light == null ? null : gpu(Bitmap.createBitmap(light, FW, FH, Bitmap.Config.ARGB_8888));
+        nightImage = night == null ? null : gpu(Bitmap.createBitmap(night, FW, FH, Bitmap.Config.ARGB_8888));
     }
 
     static Backdrop make(Bitmap src, boolean forLight) {
@@ -62,12 +62,16 @@ final class Backdrop {
             Bitmap wide = card(out, WIDE_W, WIDE_H), tall = card(out, TALL_W, TALL_H);
             int[] frost = reduce(out, FW, FH, 3, 3);
             int[] light = whiten(frost.clone(), 0.82f);
-            int[] glass = reduce(out, GW, GH, 2, 2);
-            int[] lightGlass = whiten(glass.clone(), 0.74f);
             int[] night = darken(frost.clone(), 0.76f);
-            int[] nightGlass = darken(glass, 0.56f);
+            int[] lightGlass = null, nightGlass = null;
+            if (android.os.Build.VERSION.SDK_INT >= 33) {
+                int[] glass = reduce(out, GW, GH, 2, 2);
+                lightGlass = whiten(glass.clone(), 0.74f);
+                nightGlass = darken(glass, 0.56f);
+            }
             out.recycle();
-            return new Backdrop(null, frost, null, wide, tall, light, lightGlass, night, nightGlass);
+            return new Backdrop(null, android.os.Build.VERSION.SDK_INT >= 33 ? frost : null, null, wide, tall, light,
+                    lightGlass, night, nightGlass);
         }
 
         float boost = Math.max(0, Math.min(0.3f, (luminance(out, 0, 0.22f, 0.5f, 0.62f) - 0.22f) * 1.1f));
@@ -154,7 +158,13 @@ final class Backdrop {
         }
         Bitmap out = Bitmap.createScaledBitmap(b, w, h, true);
         if (b != full && b != out) b.recycle();
-        return gpu(out);
+        Bitmap rounded = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Paint rp = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        rp.setShader(new android.graphics.BitmapShader(out, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        float rad = 18f * h / 442f;
+        new Canvas(rounded).drawRoundRect(new RectF(0, 0, w, h), rad, rad, rp);
+        if (out != full) out.recycle();
+        return gpu(rounded);
     }
 
     /** Copies it to GPU memory (cheap to draw; the process doesn't keep the pixels). */

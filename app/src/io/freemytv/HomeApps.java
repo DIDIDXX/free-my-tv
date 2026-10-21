@@ -80,6 +80,7 @@ final class HomeApps {
      */
     private static final String[][] SHELF = {
         {"netflix", "Netflix", "com.netflix.ninja", "E50914", "", "1"},
+        {"smarttube", "YouTube", "org.smarttube.stable", "FF0033", "play", "1"},
         {"youtube", "YouTube", "com.google.android.youtube.tv", "FF0033", "play", "1"},
         {"prime", "Prime Video", "com.amazon.amazonvideo.livingroom", "1A98FF", "tint", "0.96"},
         {"disney", "Disney+", "com.disney.disneyplus", "1838C8", "", "1"},
@@ -230,7 +231,12 @@ final class HomeApps {
             } catch (RuntimeException ignored) {
             }
             String label = custom != null && custom.length() > 0 ? custom.toString() : "HDMI " + number;
-            Item it = shortcut(INPUT, "hdmi" + number, label, "hdmi");
+            String symbol = "hdmi";
+            if (number == 1) {
+                label = "PlayStation 5";
+                symbol = "gamepad";
+            }
+            Item it = shortcut(INPUT, "hdmi" + number, label, symbol);
             it.inputId = info.getId();
             it.number = String.valueOf(number);
             it.connected = state == TvInputManager.INPUT_STATE_CONNECTED;
@@ -238,6 +244,42 @@ final class HomeApps {
         }
         Collections.sort(out, (a, b) -> a.number.compareTo(b.number));
         return out;
+    }
+
+    /** All installed, enabled TV apps (including the shelf apps), plus our own Settings tile. */
+    static List<Item> allTvApps(Context c) {
+        PackageManager pm = c.getPackageManager();
+        Set<String> skip = new HashSet<>();
+        skip.addAll(java.util.Arrays.asList(LIVE_TV_APPS));
+        skip.add(c.getPackageName());
+        skip.addAll(HIDDEN);
+        Intent query = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        List<Item> items = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        // First add shelf apps in their brand colors/tiles
+        for (String[] d : SHELF) {
+            if (launchIntent(pm, d[2]) == null || !seen.add(d[2])) continue;
+            Item it = new Item();
+            it.kind = APP;
+            it.key = d[0];
+            it.label = d[1];
+            it.pkg = d[2];
+            it.tile = appTile(c, d[0], d[2], 0xFF000000 | Integer.parseInt(d[3], 16));
+            items.add(it);
+        }
+        for (ResolveInfo ri : pm.queryIntentActivities(query, 0)) {
+            String pkg = ri.activityInfo.packageName;
+            if (skip.contains(pkg) || !seen.add(pkg)) continue;
+            Item it = new Item();
+            it.kind = APP;
+            it.pkg = pkg;
+            it.key = pkg;
+            it.label = String.valueOf(ri.loadLabel(pm));
+            it.tile = appTile(c, null, pkg, 0);
+            items.add(it);
+        }
+        items.add(special(c, SETTINGS, "freemytv-settings", "Free My TV", "sparkles"));
+        return items;
     }
 
     /** Installed, enabled TV apps that are not on the home screen (the TV's Settings is among them), plus our own. */
@@ -360,6 +402,10 @@ final class HomeApps {
         }
         Bitmap logo = ownLogo(c, key);
         File file = logoFile(c, key, pkg), none = new File(file.getPath() + ".none");
+        if (logo == null && "smarttube".equals(key)) {
+            // SmartTube uses YouTube's lifted logo so it gets the iconic YouTube brand mark
+            logo = shelfLogo(c, "youtube", "com.google.android.youtube.tv", "play", extract);
+        }
         if (logo == null && file.exists()) logo = BitmapFactory.decodeFile(file.getPath());
         if (logo == null) {
             if (none.exists()) {
@@ -632,9 +678,20 @@ final class HomeApps {
         Bitmap logo = key == null ? null : ownLogo(c, key);
         Bitmap tile = logo != null ? logoTile(logo, brand) : bannerTile(c, pkg);
         if (tile == null) tile = iconTile(c, pkg);
+        tile = roundTile(tile);
         tile.setHasMipMap(true);
         TILES.put(cacheKey, tile);
         return tile;
+    }
+
+    private static Bitmap roundTile(Bitmap src) {
+        Bitmap out = Bitmap.createBitmap(TILE_W, TILE_H, Bitmap.Config.ARGB_8888);
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+        p.setShader(new android.graphics.BitmapShader(src, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        float r = 22f * TILE_W / 300f;
+        new Canvas(out).drawRoundRect(new RectF(0, 0, TILE_W, TILE_H), r, r, p);
+        if (src != out) src.recycle();
+        return out;
     }
 
     /** The app's official TV art (the Android TV banner), at the highest density the app has. */
@@ -708,6 +765,7 @@ final class HomeApps {
         if (TILES.containsKey(key)) return TILES.get(key);
         Bitmap b = darkTile();
         Symbols.draw(c, new Canvas(b), symbol, TILE_W / 2f, TILE_H / 2f, TILE_H * 0.36f, 0xF2FFFFFF);
+        b = roundTile(b);
         b.setHasMipMap(true);
         TILES.put(key, b);
         return b;
