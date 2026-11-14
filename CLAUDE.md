@@ -10,30 +10,36 @@ Portuguese one by themselves, and the PT/EN switch in the menu is remembered.
 The person you're helping may not be technical. Keep it short and friendly, say what you're about to do on their TV
 before you do it, and let them do the taps on the TV.
 
-## Installing it for someone
+## Installing it for someone (one step at a time)
 
-1. **Ask** for the TV's IP address and their city, if they didn't say.
+The person you're helping may not be technical. Keep it short, friendly, and do **one short step at a time**, waiting for their reply before advancing:
+
+1. **Ask them to enable USB debugging & find the TV IP (if not given yet):**
+   - Settings → System → About → press OK 7 times on *Build* / *Android TV OS build* until developer mode activates.
+   - Back in System → *Developer options* → turn on *USB debugging*.
+   - Check *Network & Internet* for the TV's local IP address and share it with you.
 2. **Tools:** a JDK 17+, the Android SDK command-line tools (build-tools 34+, platform android-34) and adb. Check
    what's already there (`java -version`, `$ANDROID_HOME`, `adb version`) and install only what's missing.
-   - macOS: `brew install --cask temurin android-commandlinetools android-platform-tools`, then
+   - macOS: `brew install --cask temurin@17 android-commandlinetools android-platform-tools`, then
      `sdkmanager "build-tools;34.0.0" "platforms;android-34"`.
    - Linux: OpenJDK 17, Android's command-line tools and adb from the package manager, then the same `sdkmanager` line.
    - Windows: WSL, then as on Linux.
-3. **Settings:** run `./build.sh` once; it creates `config.properties`. Fill in `latitude` and `longitude` (decimal
-   degrees) and `city` for their city, `tmdb_region` (two-letter country), and `currency` and `temperature` to match.
-4. **The TMDB key is theirs and secret.** Ask them to create one (free: themoviedb.org → Settings → API) and paste it
-   after `tmdb_key=` in `config.properties` themselves. Don't ask for it in the chat, never print it, never commit
-   it. If they paste it in the chat anyway, put it only in `config.properties`.
-   Without a key everything works except the picks and the screensaver photos.
+3. **Settings (`config.properties`):** run `./build.sh` once if needed (it copies `config.example.properties`). Fill in:
+   - `team=` (`flamengo`, `palmeiras`, `corinthians`, `sao-paulo`, `vasco`, `fluminense`, `botafogo`, `gremio`, `internacional`, `cruzeiro`, `atletico-mg`, `bahia`, `athletico-pr`, `santos`, `bragantino`, `coritiba`, `vitoria`, `mirassol`, `remo`, `chapecoense`, or `none`).
+   - If weather is wanted: `weather_enabled=true`, `city=`, `latitude=`, `longitude=` (decimal degrees for sunset + forecast). If they chose no weather: `weather_enabled=false` and `city=`.
+   - `tmdb_region=`, `language=`, `currency=`, `temperature=`, and `ps5_hdmi_volume=true|false`.
+4. **The TMDB key is theirs and secret.** If they want movie/show recommendations, guide them to create a free key
+   (`themoviedb.org` → Settings → API) and paste it after `tmdb_key=` in `config.properties` themselves (or put it only
+   in `config.properties`, never print or commit it). Without a key everything works except TMDB picks & screensaver backdrops.
 5. **Build:** `./build.sh` → `FreeMyTV.apk`. Keep `freemytv.keystore`: updates must be signed with the same key.
-6. **Install:** `adb connect <IP>:5555`. The TV asks *Allow USB debugging?*: tell them to accept and tick *Always
+6. **Connect & Install:** `adb connect <IP>:5555`. Tell them to accept *Allow USB debugging?* on the TV screen and tick *Always
    allow*. Then `adb install -r FreeMyTV.apk`.
-7. **Tell them what the switch does** before they make it: the home screen and screensaver change, a short list of
-   promo apps is turned off (never uninstalled), and *Original* brings it all back. On some TVs the remote's
-   shortcut buttons belong to the stock home screen (TCL: Netflix, YouTube, Prime), so they rest while Free My TV
-   is on.
-8. **They switch on the TV:** *Free My TV* → *Home Screen* → *Free My TV*. The app uses the TV's own ADB on
-   127.0.0.1 with its own key, so the TV asks once more to allow debugging. Don't switch modes from the computer.
+7. **Tell them what the switch does** before activating: the home screen and screensaver change, bloatware/promo apps
+   are safely disabled (`pm disable-user`, never uninstalled), and *Original* brings it all back.
+8. **Activate Home Mode:**
+   - Android 12+ (API 31+): have them open *Free My TV* → *Início / Home Screen* → *Free My TV* on the TV and accept the localhost ADB prompt.
+   - Android 11 (API 30, e.g. TCL): `HomeMode` delegates to `LegacyHomeBridge` (`WRITE_SECURE_SETTINGS` can be granted via `adb shell pm grant io.freemytv android.permission.WRITE_SECURE_SETTINGS`). For **zero-flicker** Home button on TCL Android 11 (when the user asked for bloatware/launcher optimization), you can disable the stock home launcher via ADB: `adb shell pm disable-user --user 0 com.google.android.apps.tv.launcherx`, `adb shell pm disable-user --user 0 com.google.android.tungsten.setupwraith`, `adb shell cmd package set-home-activity io.freemytv/.HomeActivity`, plus enable `LegacyHomeBridge` accessibility service. Reversing is `pm enable` + `set-home-activity`.
+   - Optional AdGuard Private DNS (only if the user asked for it): `adb shell settings put global private_dns_mode hostname && adb shell settings put global private_dns_specifier dns.adguard-dns.com`.
 9. **Check:** `adb logcat -s FreeMyTV` shows what the switch did.
 
 ## Adapting it to another TV
@@ -87,4 +93,4 @@ TVs that don't run Google TV or Android TV (Samsung, LG and others): the way is 
 
 ## TCL performance branch
 
-README.md documents this branch; README.upstream.md preserves upstream instructions. Private configuration, signing keys, generated output and personal APKs must remain local. Historical benchmarks are before/after local optimization, not a comparison to current upstream. The football tab is currently Flamengo-specific. Do not disable debugging on the owner's TV: they explicitly requested that it remain on.
+README.md documents this branch; README.upstream.md preserves upstream instructions. Private configuration, signing keys, generated output and personal APKs must remain local. Historical benchmarks are before/after local optimization, not a comparison to current upstream. `ClubData` supports configuring Brazilian Série A clubs via `team=` in `config.properties` (or `none`), optional weather via `weather_enabled=`, and optional PS5 HDMI-1 volume via `ps5_hdmi_volume=`. Do not disable debugging on the owner's TV: they explicitly requested that it remain on.

@@ -20,7 +20,9 @@ Fork do [Free My TV de simbasjungles](https://github.com/simbasjungles/free-my-t
 - Compatibilidade Android 11/API 30 e retorno ao launcher pelo botão Home usando serviço de acessibilidade restrito aos launchers do sistema.
 - Sombras cacheadas, escala de texto por matriz, desenho dividido em RenderNodes e quadros solicitados sob demanda para reduzir trabalho nas animações.
 - Dock e atalhos para streaming, incluindo SmartTube quando instalado; clima e recomendações TMDB configuráveis.
-- Aba **Flamengo experimental**: jogos, resultados, tabela e links de melhores momentos. Dados via ESPN e busca/abertura no YouTube. A seleção de outros times ainda não está implementada.
+- Aba **Meu Time (Brasileirão Série A)**: escolha seu time no `config.properties` (`team=flamengo`, `palmeiras`, `corinthians`, `sao-paulo`, `vasco`, `fluminense`, `botafogo`, `gremio`, `internacional`, `cruzeiro`, `atletico-mg`, `bahia`, etc. ou `none` para desativar). Mostra tabela atualizada, últimos 5 jogos com melhores momentos no SmartTube/YouTube e próximos jogos ao vivo via ESPN.
+- Clima e pôr do sol opcionais (`weather_enabled=true|false`) e modo gamer/PS5 opcional no HDMI 1 (`ps5_hdmi_volume=true|false`).
+- Assistente de onboarding no site GitHub Pages (`https://dididxx.github.io/free-my-tv/pt/`): responda qual seu time, sua cidade e extras, copie o prompt e cole no Claude para ele guiar tudo passo a passo.
 - Interface do launcher sem publicidade, herdada do projeto original.
 
 ### Bloqueio de anúncios na TV
@@ -47,7 +49,7 @@ Aceite a autorização do computador na TV. Em Android 11, abra as configuraçõ
 
 ## Origem e estado
 
-Ramo de adaptação baseado no commit upstream `501bc3c1396604d4027067575dc9934fda418de6`. O upstream avançou desde essa base; este ramo ainda não incorpora essas mudanças. O site em `docs/` e `README.upstream.md` são materiais herdados e podem descrever recursos/requisitos diferentes deste ramo. Publicação automática do site foi removida para não republicar o site original.
+Ramo de adaptação baseado no commit upstream `501bc3c1396604d4027067575dc9934fda418de6`. O site em `docs/` e `docs/pt/` é publicado via GitHub Pages com o configurador de onboarding guiado para Claude Code.
 
 Nenhuma alteração de firmware, root ou promessa de desempenho de Apple TV 4K. A TCL continua limitada pelo hardware. A integração de controle Mac/AirPlay usada na TV é um projeto separado.
 

@@ -88,10 +88,20 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private static final float L_TALL_W = 320, L_CARD_GAP = 40, L_BUTTON = 68, L_BUTTON_GAP = 20, L_BUTTON_CY = 103;
     private static final float L_PLATTER_TOP = 814, L_TILE_H = 126;
     private static final int L_INK = 0xFF1D1D1F, L_DIM = 0xFF6E6E73, L_FAINT = 0xFF8E8E93;
-    private static final String[] TABS = {"Explorar", "Aplicativos", "Séries", "Flamengo"};
-    private static final String[] TABS_EN = {"Explore", "Apps", "Shows", "Flamengo"};
+    private static final String[] TABS = buildTabs(false);
+    private static final String[] TABS_EN = buildTabs(true);
     private static final String[] TAB_KIND = {null, null, "tv", null};
+    private static final int CLUB_TAB = ClubData.isEnabled() ? 3 : -1;
+    private static final int TAB_COUNT = ClubData.isEnabled() ? 4 : 3;
     private static final int Z_TOP = 4, Z_CARDS = 5;
+
+    private static String[] buildTabs(boolean en) {
+        if (!ClubData.isEnabled()) {
+            return en ? new String[] {"Explore", "Apps", "Shows"} : new String[] {"Explorar", "Aplicativos", "Séries"};
+        }
+        String club = ClubData.activeProfile().shortName;
+        return en ? new String[] {"Explore", "Apps", "Shows", club} : new String[] {"Explorar", "Aplicativos", "Séries", club};
+    }
 
     private final Activity activity;
     private final Scene scene = new Scene();
@@ -314,6 +324,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             if (!running) return;
             data.refreshIfStale();
             recs.refreshIfStale();
+            refreshClubIfEnabled();
             checkNotices();
             updatePalette();
             checkNight(true);
@@ -322,6 +333,16 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             handler.postDelayed(this, 15_000);
         }
     };
+
+    private void refreshClubIfEnabled() {
+        if (!ClubData.isEnabled()) return;
+        ClubData.get(getContext()).refreshIfStale(() -> {
+            if (!running) return;
+            cardsDirty = heroDirty = true;
+            heroLayer.invalidate();
+            scheduleFrame();
+        });
+    }
 
     HomeView(Activity a) {
         super(a);
@@ -385,6 +406,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         recs.addListener(this);
         data.refreshIfStale();
         recs.refreshIfStale();
+        refreshClubIfEnabled();
         if (tvInputs != null) tvInputs.registerCallback(inputCallback, handler);
         handler.postDelayed(tick, 15_000);
         checkNotices();
@@ -606,11 +628,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         flaTableNum = Ui.numbers(Ui.regular, 19 * k, 0xFFB8C7D9);
         flaLine.setColor(0x24567191);
         flaLine.setStrokeWidth(1.2f * k);
+        ClubData.Profile cp = ClubData.activeProfile();
+        int glowTopCol = cp != null ? cp.glowTopColor : 0x58A80B18;
+        int glowBotCol = cp != null ? cp.glowBotColor : 0x389B0814;
         flaSkyBg = new LinearGradient(0, 0, 0, h, 0xFF070A0F, 0xFF04060A, Shader.TileMode.CLAMP);
         flaGlowTop = new RadialGradient(1680 * k, 110 * k, 820 * k,
-                new int[]{0x58A80B18, 0x2460050D, 0x00000000}, null, Shader.TileMode.CLAMP);
+                new int[]{glowTopCol, Ui.alpha(glowTopCol, 0.42f), 0x00000000}, null, Shader.TileMode.CLAMP);
         flaGlowBot = new RadialGradient(1120 * k, 1040 * k, 520 * k,
-                new int[]{0x389B0814, 0x00000000}, null, Shader.TileMode.CLAMP);
+                new int[]{glowBotCol, 0x00000000}, null, Shader.TileMode.CLAMP);
         flaCardBg = new LinearGradient(0, 276 * k, 0, 996 * k, 0xF20C111A, 0xF5080B12, Shader.TileMode.CLAMP);
         gridLabel = new TextPaint(Ui.text(Ui.medium, 24 * k, 0x99FFFFFF));
         gridLabel.setTextAlign(Paint.Align.CENTER);
@@ -1094,7 +1119,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         if (showInfo()) {
             info = 26 * k + capsuleText.measureText(clockText);
             HomeData.Weather wx = data.weather;
-            if (!Double.isNaN(wx.temp)) {
+            if (HomeData.weatherEnabled() && !Double.isNaN(wx.temp)) {
                 info += 22 * k + Symbols.width(getContext(), Symbols.weather(wx.code, wx.isDay), 24 * k) + 8 * k
                         + capsuleText.measureText(HomeData.degrees(wx.temp));
             }
@@ -1169,7 +1194,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         Paint text = lQuote;
         // The corner buttons' names appear in this row: the quotes fade out while one of them has focus.
         float fade = 1;
-        for (int i = 4; i < 7; i++) fade = Math.min(fade, 1 - Ui.clamp(topFocus[i].value));
+        for (int i = TAB_COUNT; i < TAB_COUNT + 3; i++) fade = Math.min(fade, 1 - Ui.clamp(topFocus[i].value));
         if (fade <= 0.01f) return;
         int textColor = text.getColor();
         text.setColor(Ui.alpha(textColor, fade));
@@ -1512,6 +1537,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         drawerCard(c, r);
         float x = r.left + 34 * k;
         c.drawText(Config.CITY.trim().isEmpty() ? Ui.tr("Clima", "Weather") : Config.CITY.trim(), x, r.top + 54 * k, cardTitle);
+        if (!HomeData.weatherEnabled()) {
+            c.drawText(Ui.tr("Clima desativado na configuração.", "Weather disabled in settings."), x, r.top + 120 * k, cardDim);
+            return;
+        }
         HomeData.Weather wx = data.weather;
         if (Double.isNaN(wx.temp)) {
             c.drawText(Ui.tr("Sem dados do clima agora.", "No weather data right now."), x, r.top + 120 * k, cardDim);
@@ -2081,18 +2110,18 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             it = drawerItems.get(drawerIndex);
             r = drawerRects[drawerIndex];
         } else if (zone == Z_TOP) {
-            if (topIndex < 4) {
+            if (topIndex < TAB_COUNT) {
                 selectTab(topIndex);
                 return;
             }
-            it = lightButtons.get(topIndex - 4);
+            it = lightButtons.get(topIndex - TAB_COUNT);
             r = topRects[topIndex];
         } else if (zone == Z_CARDS) {
-            if (tab == 3) {
-                List<FlamengoData.MatchResult> past = FlamengoData.get(getContext()).lastResults;
+            if (tab == CLUB_TAB) {
+                List<ClubData.MatchResult> past = ClubData.get(getContext()).lastResults;
                 if (cardIndex < 0 || cardIndex >= past.size()) return;
                 click.open();
-                FlamengoData.launchMatchHighlights(activity, past.get(cardIndex));
+                ClubData.launchMatchHighlights(activity, past.get(cardIndex));
                 return;
             }
             if (tab == 1) {
@@ -2138,7 +2167,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         // Text tabs; the focus pill extends 26 px past the text (the first tab's text starts at the margin).
         float pad = 26 * k, tabTop = L_TABBAR_TOP * k, tabBottom = (L_TABBAR_TOP + L_TABBAR_H) * k;
         float x = MARGIN * k - pad;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < TAB_COUNT; i++) {
             float tw = Math.max(lTabOn.measureText(tabs()[i]), lTab.measureText(tabs()[i]));
             topRects[i].set(x, tabTop, x + tw + 2 * pad, tabBottom);
             x = topRects[i].right + 4 * k;
@@ -2152,7 +2181,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         float b = L_BUTTON * k, right = CONTENT_R * k, cy = L_BUTTON_CY * k;
         for (int i = 2; i >= 0; i--) {
-            topRects[4 + i].set(right - b, cy - b / 2, right, cy + b / 2);
+            topRects[TAB_COUNT + i].set(right - b, cy - b / 2, right, cy + b / 2);
             right -= b + L_BUTTON_GAP * k;
         }
         float top = L_CARDS_TOP * k, ch = L_CARD_H * k, g = L_CARD_GAP * k, left = MARGIN * k, tall = L_TALL_W * k;
@@ -2188,7 +2217,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         List<Recs.Pick> list = recs.now(TAB_KIND[tab]);
         if (!samePicks(list, cards)) {
             cards = list;
-            if (tab != 3 && tab != 1) {
+            if (tab != CLUB_TAB && tab != 1) {
                 cardIndex = Math.min(cardIndex, Math.max(0, list.size() - 1));
                 if (zone == Z_CARDS && list.isEmpty()) {
                     zone = Z_SHELF;
@@ -2198,34 +2227,34 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         }
         cacheCardStrings();
         for (Recs.Pick p : recs.wanted()) recs.backdrop(p);   // all three tabs preloaded: switching tabs is instant
-        Backdrop b = cards.isEmpty() || tab == 3 || tab == 1 ? null : recs.backdrop(cards.get(0));
-        if (cards.isEmpty() || tab == 3 || tab == 1 || b != null) showBackdrop(b);
+        Backdrop b = cards.isEmpty() || tab == CLUB_TAB || tab == 1 ? null : recs.backdrop(cards.get(0));
+        if (cards.isEmpty() || tab == CLUB_TAB || tab == 1 || b != null) showBackdrop(b);
         heroDirty = cardsDirty = true;
         scheduleFrame();
     }
 
     private void selectTab(int index) {
-        if (index == tab) return;
+        if (index == tab || index >= TAB_COUNT) return;
         tab = index;
-        tabMorph.target = (index == 3) ? 1f : 0f;
+        tabMorph.target = (index == CLUB_TAB) ? 1f : 0f;
         appsMorph.target = (index == 1) ? 1f : 0f;
         if (topRects[index] != null && topRects[index].width() > 0) {
             pillX.target = topRects[index].centerX();
             pillW.target = topRects[index].width();
         }
-        if (index == 3) {
+        if (index == CLUB_TAB) {
             flaCol1.snap(0f); flaCol1.target = 1f;
             flaCol2.snap(0f); flaCol2.target = 1f;
             flaCol3.snap(0f); flaCol3.target = 1f;
         }
-        if ((tab == 3 || tab == 1) && drawerOpen) {
+        if ((tab == CLUB_TAB || tab == 1) && drawerOpen) {
             drawerOpen = false;
             drawer.snap(0);
         }
         if (tab == 1) {
             appTabIndex = 0;
             appTabScroll.snap(0);
-        } else if (tab != 3) {
+        } else if (tab != CLUB_TAB) {
             cardIndex = Math.min(cardIndex, Math.max(0, cards.size() - 1));
         } else {
             cardIndex = 0;
@@ -2236,12 +2265,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         status.invalidate();
         platter.invalidate();
         tiles.invalidate();
-        if (tab == 3) {
-            FlamengoData.get(getContext()).refresh(() -> {
-                cardsDirty = heroDirty = true;
-                heroLayer.invalidate();
-                scheduleFrame();
-            });
+        if (tab == CLUB_TAB) {
+            refreshClubIfEnabled();
         }
         scheduleFrame();
     }
@@ -2297,7 +2322,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private void drawLiveWeatherSky(Canvas c, long up, float morph) {
         float t = up / 1000f;
         HomeData.Weather wx = data.weather;
-        int code = wx.code;
+        int code = HomeData.weatherEnabled() ? wx.code : -1;
         boolean rainy = (code >= 51 && code <= 67) || (code >= 80 && code <= 99);
         boolean stormy = code >= 95;
         long nowMs = System.currentTimeMillis();
@@ -2376,8 +2401,9 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             }
         }
 
-        // 4. Floating crimson/gold embers on Flamengo tab (when morph > 0.05)
-        if (morph > 0.05f) {
+        // 4. Floating club-colored embers on Club tab (when morph > 0.05)
+        if (morph > 0.05f && ClubData.isEnabled()) {
+            ClubData.Profile cp = ClubData.activeProfile();
             fxPaint.setStyle(Paint.Style.FILL);
             for (int i = 0; i < 22; i++) {
                 float speed = (28f + (i % 6) * 11f) * k;
@@ -2386,7 +2412,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 float x = ((i * 197 + 60) % 1920) * k + sway;
                 float fadeY = smoothstep(0, 0.2f, y / h) * (1f - smoothstep(0.75f, 1f, (h - y) / h));
                 float r = (1.6f + (i % 4) * 0.9f) * k;
-                int emberCol = (i % 4 == 0) ? 0xFFFFB703 : 0xFFFF2A3C;
+                int emberCol = (i % 4 == 0) ? cp.emberSecondary : cp.emberPrimary;
                 fxPaint.setColor(Ui.alpha(emberCol, morph * fadeY * 0.48f));
                 c.drawCircle(x, y, r, fxPaint);
             }
@@ -2407,12 +2433,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 applyTone();
                 float tabShiftY = 34 * k * morph;
                 float tabShiftX = 16 * k * morph;
-                if (morph > 0.005f) {
+                if (morph > 0.005f && ClubData.isEnabled()) {
+                    ClubData.Profile cp = ClubData.activeProfile();
                     flaHeaderTitle.setAlpha(Math.round(255 * morph));
                     flaHeaderSub.setAlpha(Math.round(255 * morph));
                     float slide = (1f - morph) * 28 * k;
-                    rc.drawText("Flamengo", 96 * k - Ui.leftBearing(flaHeaderTitle, "Flamengo") + slide, 114 * k, flaHeaderTitle);
-                    rc.drawText("Clube de Regatas do Flamengo", 96 * k + slide, 154 * k, flaHeaderSub);
+                    rc.drawText(cp.shortName, 96 * k - Ui.leftBearing(flaHeaderTitle, cp.shortName) + slide, 114 * k, flaHeaderTitle);
+                    rc.drawText(cp.fullName, 96 * k + slide, 154 * k, flaHeaderSub);
                     flaHeaderTitle.setAlpha(255);
                     flaHeaderSub.setAlpha(255);
                 }
@@ -2459,13 +2486,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             RecordingCanvas rc = cardsNode.beginRecording(w, h);
             try {
                 applyTone();
-                if (tab == 3 || morph > 0.01f) {
-                    drawFlamengoTab(rc);
+                if (ClubData.isEnabled() && (tab == CLUB_TAB || morph > 0.01f)) {
+                    drawClubTab(rc);
                 }
                 if (tab == 1 || appsMorph.value > 0.01f) {
                     drawAppsTab(rc);
                 }
-                if (tab != 3 && tab != 1) {
+                if (tab != CLUB_TAB && tab != 1) {
                     if (cards.isEmpty()) {
                         clockPaint.setColor(tone(L_INK, WHITE));
                         rc.drawText(clockText, (w - clockPaint.measureText(clockText)) / 2, 555 * k, clockPaint);
@@ -2556,8 +2583,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         c.drawBitmap(b, null, tmp, bitmapPaint);
     }
 
-    private void drawFlamengoTab(RecordingCanvas c) {
-        FlamengoData fla = FlamengoData.get(getContext());
+    private void drawClubTab(RecordingCanvas c) {
+        ClubData club = ClubData.get(getContext());
+        ClubData.Profile cp = ClubData.activeProfile();
+        if (cp == null) return;
         float morph = Ui.clamp(tabMorph.value);
         if (morph <= 0.01f) return;
         float left = 96 * k, top = 276 * k + (1f - morph) * 32 * k;
@@ -2578,7 +2607,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         border.setStrokeWidth(1.5f * k);
         c.drawRoundRect(cell, r0, r0, border);
 
-        Bitmap flaCrest = fla.getFlamengoCrest();
+        Bitmap clubCrest = club.getClubCrest();
 
         // 3 Columns geometry with staggered spring slide-in from right to left
         float slide1 = (1f - flaCol1.value) * 68 * k;
@@ -2616,31 +2645,31 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
         c.drawLine(c1Left, top + 152 * k, c1Right, top + 152 * k, flaLine);
 
-        int nStand = Math.min(8, fla.standings.size());
+        int nStand = Math.min(8, club.standings.size());
         float standRowH = 66 * k;
         flaTableNum.setTextAlign(Paint.Align.CENTER);
         for (int i = 0; i < nStand; i++) {
-            FlamengoData.StandingRow rk = fla.standings.get(i);
+            ClubData.StandingRow rk = club.standings.get(i);
             float rTop = top + 158 * k + i * standRowH;
             float rMid = rTop + standRowH * 0.5f;
 
-            if (rk.isFla) {
+            if (rk.isClub) {
                 tmp.set(c1Left - 8 * k, rTop + 4 * k, c1Right + 8 * k, rTop + standRowH - 4 * k);
                 fill.setShader(new LinearGradient(tmp.left, tmp.top, tmp.right, tmp.bottom,
-                        0xCC6E0913, 0xB846050C, Shader.TileMode.CLAMP));
+                        cp.rowStartColor, cp.rowEndColor, Shader.TileMode.CLAMP));
                 c.drawRoundRect(tmp, 10 * k, 10 * k, fill);
                 fill.setShader(null);
-                border.setColor(0xFFD92332);
+                border.setColor(cp.accentColor);
                 border.setStrokeWidth(1.6f * k);
                 c.drawRoundRect(tmp, 10 * k, 10 * k, border);
             }
 
             c.drawText(rk.rank, c1Left + 10 * k, rMid + Ui.halfCap(flaTeamName), flaTeamName);
 
-            Bitmap rkCrest = rk.isFla ? flaCrest : fla.getTeamCrest(rk.teamId);
+            Bitmap rkCrest = rk.isClub ? clubCrest : club.getTeamCrest(rk.teamId);
             drawCrest(c, rkCrest, c1Left + 62 * k, rMid, 32 * k);
 
-            flaTeamName.setColor(rk.isFla ? 0xFFFFFFFF : 0xFFE2E8F0);
+            flaTeamName.setColor(rk.isClub ? 0xFFFFFFFF : 0xFFE2E8F0);
             c.drawText(rk.name, c1Left + 88 * k, rMid + Ui.halfCap(flaTeamName), flaTeamName);
 
             flaTeamName.setColor(0xFFFFFFFF);
@@ -2648,7 +2677,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawText(rk.points, colP, rMid + Ui.halfCap(flaTeamName), flaTeamName);
             flaTeamName.setTextAlign(Paint.Align.LEFT);
 
-            flaTableNum.setColor(rk.isFla ? 0xFFFFFFFF : 0xFFB8C7D9);
+            flaTableNum.setColor(rk.isClub ? 0xFFFFFFFF : 0xFFB8C7D9);
             c.drawText(rk.played, colJ, rMid + Ui.halfCap(flaTableNum), flaTableNum);
             c.drawText(rk.wins, colV, rMid + Ui.halfCap(flaTableNum), flaTableNum);
             c.drawText(rk.goalDiff, colSg, rMid + Ui.halfCap(flaTableNum), flaTableNum);
@@ -2659,10 +2688,13 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         c.drawText("Últimos jogos", c2Left, top + 58 * k, flaSectionTitle);
         c.drawLine(c2Left, top + 88 * k, c2Right, top + 88 * k, flaLine);
 
-        int nPast = Math.min(5, fla.lastResults.size());
+        int nPast = Math.min(5, club.lastResults.size());
+        if (nPast == 0) {
+            c.drawText("Carregando jogos…", c2Left, top + 146 * k, flaMatchMeta);
+        }
         float pastRowH = 118 * k;
         for (int i = 0; i < nPast; i++) {
-            FlamengoData.MatchResult m = fla.lastResults.get(i);
+            ClubData.MatchResult m = club.lastResults.get(i);
             float rTop = top + 96 * k + i * pastRowH;
             float rBot = rTop + pastRowH;
             flaRowRects[i].set(c2Left - 10 * k, rTop + 4 * k, c2Right + 10 * k, rBot - 4 * k);
@@ -2674,10 +2706,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             float f = Ui.clamp(cardFocus[i].value);
             if (f > 0.01f) {
                 fill.setShader(new LinearGradient(flaRowRects[i].left, flaRowRects[i].top, flaRowRects[i].right, flaRowRects[i].bottom,
-                        Ui.alpha(0xCC6E0913, f), Ui.alpha(0x88240A12, f), Shader.TileMode.CLAMP));
+                        Ui.alpha(cp.rowStartColor, f), Ui.alpha(0x88141824, f), Shader.TileMode.CLAMP));
                 c.drawRoundRect(flaRowRects[i], 12 * k, 12 * k, fill);
                 fill.setShader(null);
-                border.setColor(Ui.alpha(0xFFFF3B4E, f));
+                border.setColor(Ui.alpha(cp.accentColor, f));
                 border.setStrokeWidth(2f * k);
                 c.drawRoundRect(flaRowRects[i], 12 * k, 12 * k, border);
             }
@@ -2687,7 +2719,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
             float matchY = rTop + 74 * k;
             // Home team crest & name
-            Bitmap bHome = "819".equals(m.homeId()) ? flaCrest : fla.getTeamCrest(m.homeId());
+            Bitmap bHome = cp.teamId.equals(m.homeId()) ? clubCrest : club.getTeamCrest(m.homeId());
             drawCrest(c, bHome, c2Left + 18 * k, matchY, 34 * k);
             flaTeamName.setColor(m.isHome ? 0xFFFFFFFF : 0xFFD5E0EC);
             c.drawText(m.homeTeam(), c2Left + 44 * k, matchY + Ui.halfCap(flaTeamName), flaTeamName);
@@ -2699,7 +2731,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             flaTeamName.setTextAlign(Paint.Align.LEFT);
 
             // Away team crest & name
-            Bitmap bAway = "819".equals(m.awayId()) ? flaCrest : fla.getTeamCrest(m.awayId());
+            Bitmap bAway = cp.teamId.equals(m.awayId()) ? clubCrest : club.getTeamCrest(m.awayId());
             drawCrest(c, bAway, c2Left + 302 * k, matchY, 34 * k);
             flaTeamName.setColor(!m.isHome ? 0xFFFFFFFF : 0xFFD5E0EC);
             c.drawText(m.awayTeam(), c2Left + 328 * k, matchY + Ui.halfCap(flaTeamName), flaTeamName);
@@ -2713,14 +2745,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
             c.drawText(m.result, tmp.centerX(), matchY + Ui.halfCap(flaBadgeText), flaBadgeText);
         }
 
-        // ================= COLUMN 3 (RIGHT): PRÓXIMOS JOGOS (5 Rows) =================
+        // ================= COLUMN 3 (RIGHT): PRÓXIMOS JOGOS (Up to 5 Rows) =================
         c.drawText("Próximos jogos", c3Left, top + 58 * k, flaSectionTitle);
         c.drawLine(c3Left, top + 88 * k, c3Right, top + 88 * k, flaLine);
 
-        int nFixtures = Math.min(5, fla.nextFixtures.size());
+        int nFixtures = Math.min(5, club.nextFixtures.size());
+        if (nFixtures == 0) {
+            c.drawText("Sem próximos jogos no calendário", c3Left, top + 146 * k, flaMatchMeta);
+        }
         float fixRowH = 118 * k;
         for (int i = 0; i < nFixtures; i++) {
-            FlamengoData.Fixture fx = fla.nextFixtures.get(i);
+            ClubData.Fixture fx = club.nextFixtures.get(i);
             float rTop = top + 96 * k + i * fixRowH;
             float rBot = rTop + fixRowH;
 
@@ -2733,25 +2768,26 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
             float matchY = rTop + 74 * k;
             // Home team crest & name
-            Bitmap bHome = "819".equals(fx.homeId) ? flaCrest : fla.getTeamCrest(fx.homeId);
+            Bitmap bHome = cp.teamId.equals(fx.homeId) ? clubCrest : club.getTeamCrest(fx.homeId);
             drawCrest(c, bHome, c3Left + 18 * k, matchY, 34 * k);
-            flaTeamName.setColor("819".equals(fx.homeId) ? 0xFFFFFFFF : 0xFFD5E0EC);
+            flaTeamName.setColor(cp.teamId.equals(fx.homeId) ? 0xFFFFFFFF : 0xFFD5E0EC);
             c.drawText(fx.homeTeam, c3Left + 44 * k, matchY + Ui.halfCap(flaTeamName), flaTeamName);
 
             // Stacked Date / Time + "-"
             float dateCx = c3Left + 244 * k;
             flaMatchMeta.setTextAlign(Paint.Align.CENTER);
-            flaMatchMeta.setColor(0xFFD5E0EC);
+            flaMatchMeta.setColor(fx.live ? 0xFF22C55E : 0xFFD5E0EC);
             c.drawText(fx.datePart(), dateCx, matchY - 4 * k, flaMatchMeta);
-            flaMatchMeta.setColor(0xFF8FA0B5);
+            flaMatchMeta.setColor(fx.live ? 0xFFFFFFFF : 0xFF8FA0B5);
             c.drawText(fx.timePart(), dateCx, matchY + 20 * k, flaMatchMeta);
+            flaMatchMeta.setColor(0xFF8FA0B5);
             c.drawText("-", c3Left + 284 * k, matchY + Ui.halfCap(flaMatchMeta), flaMatchMeta);
             flaMatchMeta.setTextAlign(Paint.Align.LEFT);
 
             // Away team crest & name
-            Bitmap bAway = "819".equals(fx.awayId) ? flaCrest : fla.getTeamCrest(fx.awayId);
+            Bitmap bAway = cp.teamId.equals(fx.awayId) ? clubCrest : club.getTeamCrest(fx.awayId);
             drawCrest(c, bAway, c3Left + 320 * k, matchY, 34 * k);
-            flaTeamName.setColor("819".equals(fx.awayId) ? 0xFFFFFFFF : 0xFFD5E0EC);
+            flaTeamName.setColor(cp.teamId.equals(fx.awayId) ? 0xFFFFFFFF : 0xFFD5E0EC);
             c.drawText(fx.awayTeam, c3Left + 346 * k, matchY + Ui.halfCap(flaTeamName), flaTeamName);
             flaTeamName.setColor(0xFFFFFFFF);
         }
@@ -2764,8 +2800,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private void drawLightButtons(Canvas c) {
         applyTone();
         for (int i = 0; i < 3; i++) {
-            RectF r = topRects[4 + i];
-            float f = Ui.clamp(topFocus[4 + i].value), s = 1 + 0.1f * f, rad = r.width() / 2 * s;
+            RectF r = topRects[TAB_COUNT + i];
+            float f = Ui.clamp(topFocus[TAB_COUNT + i].value), s = 1 + 0.1f * f, rad = r.width() / 2 * s;
             cell.set(r.centerX() - rad, r.centerY() - rad, r.centerX() + rad, r.centerY() + rad);
             drawShadow(c, r.centerX(), r.centerY(), r.width(), r.height(), r.width() / 2, 26 * k, s, (6 + 8 * f) * k,
                     Math.round(255 * (tone(0.1f, 0.3f) + tone(0.14f, 0.2f) * f)));
@@ -2792,7 +2828,7 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         switch (zone) {
             case Z_SHELF:
                 if (dy >= 0 || shelf.isEmpty()) return false;
-                if (cards.isEmpty() || tab == 3) {
+                if (cards.isEmpty() || tab == CLUB_TAB) {
                     zone = Z_TOP;
                     topIndex = tab;
                 } else {
@@ -2833,8 +2869,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                     }
                     break;
                 }
-                if (tab == 3) {
-                    int nPast = Math.min(5, FlamengoData.get(getContext()).lastResults.size());
+                if (tab == CLUB_TAB) {
+                    int nPast = Math.min(5, ClubData.get(getContext()).lastResults.size());
                     if (dy < 0) {
                         if (cardIndex > 0) {
                             cardIndex--;
@@ -2867,10 +2903,10 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                 break;
             case Z_TOP:
                 if (dx != 0) {
-                    int next = Math.max(0, Math.min(6, topIndex + dx));
+                    int next = Math.max(0, Math.min(TAB_COUNT + 2, topIndex + dx));
                     if (next == topIndex) return true;
                     topIndex = next;
-                    if (topIndex < 4) selectTab(topIndex);   // like Apple TV tabs: focusing a tab selects it
+                    if (topIndex < TAB_COUNT) selectTab(topIndex);   // like Apple TV tabs: focusing a tab selects it
                 } else if (dy > 0) {
                     if (tab == 1) {
                         if (!allApps.isEmpty()) {
@@ -2878,8 +2914,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
                         } else {
                             return true;
                         }
-                    } else if (tab == 3) {
-                        int nPast = Math.min(5, FlamengoData.get(getContext()).lastResults.size());
+                    } else if (tab == CLUB_TAB) {
+                        int nPast = Math.min(5, ClubData.get(getContext()).lastResults.size());
                         if (nPast > 0) {
                             zone = Z_CARDS;
                             cardIndex = 0;

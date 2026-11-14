@@ -1064,6 +1064,253 @@ h2 {
   background: #30d158;
 }
 
+/* ---------- Guided onboarding wizard ---------- */
+
+.wizard {
+  margin-top: 28px;
+  display: grid;
+  gap: 24px;
+}
+
+.w-step {
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.w-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.w-badge {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.w-head h4 {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.w-desc {
+  margin: 0 0 14px 38px;
+  font-size: 14.5px;
+  color: var(--muted);
+}
+
+.w-clubs {
+  margin-left: 38px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.club-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 560;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.club-pill:hover {
+  transform: translateY(-1px);
+  background: #fff;
+}
+
+.club-pill[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+.club-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot, #8e8e93);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.w-row {
+  margin-left: 38px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.w-input,
+.w-select {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.w-input {
+  flex: 1 1 240px;
+}
+
+.w-input:focus,
+.w-select:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.16);
+}
+
+.w-input:disabled {
+  opacity: 0.45;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.w-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.w-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  accent-color: #0071e3;
+  cursor: pointer;
+}
+
+.w-check small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.w-checks {
+  margin-left: 38px;
+  display: grid;
+  gap: 12px;
+}
+
+.w-status {
+  margin: 8px 0 0 38px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.prompt-card {
+  border-radius: 22px;
+  background: linear-gradient(135deg, #161822, #1f1b2e);
+  color: #f5f5f7;
+  padding: 20px 22px;
+  box-shadow: 0 18px 40px rgba(15, 18, 30, 0.2);
+}
+
+.prompt-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.prompt-bar span {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.01em;
+}
+
+.prompt-copy {
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), background 0.2s, color 0.2s;
+}
+
+.prompt-copy:hover {
+  transform: translateY(-1px);
+}
+
+.prompt-copy.done {
+  background: #30d158;
+  color: #fff;
+}
+
+.prompt-pre {
+  margin: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+  color: #eef1ff;
+}
+
+.prompt-hint {
+  margin: 12px 0 0;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+@media (max-width: 560px) {
+  .w-step {
+    padding: 18px 16px;
+  }
+  .w-desc,
+  .w-clubs,
+  .w-row,
+  .w-checks,
+  .w-status {
+    margin-left: 0;
+  }
+}
+
 /* ---------- Compatibility ---------- */
 
 .chips {

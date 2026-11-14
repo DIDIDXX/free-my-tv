@@ -95,10 +95,16 @@ final class HomeData {
             String p = cache.getString("prices", null);
             if (p != null) parsePrices(p);
             pricesAt = cache.getLong("pricesAt", 0);
-            String w = cache.getString("weather", null);
-            if (w != null) weather = parseWeather(w);
-            weatherAt = cache.getLong("weatherAt", 0);
+            if (weatherEnabled()) {
+                String w = cache.getString("weather", null);
+                if (w != null) weather = parseWeather(w);
+                weatherAt = cache.getLong("weatherAt", 0);
+            }
         } catch (Exception ignored) {}
+    }
+
+    static boolean weatherEnabled() {
+        return Config.WEATHER_ENABLED && !Config.CITY.trim().isEmpty();
     }
 
     void addListener(Listener l) { if (!listeners.contains(l)) listeners.add(l); }
@@ -124,7 +130,7 @@ final class HomeData {
                 }
             });
         }
-        if (!Config.CITY.trim().isEmpty() && !fetchingWeather && (now - weatherAt > WEATHER_EVERY || now < weatherAt)) {
+        if (weatherEnabled() && !fetchingWeather && (now - weatherAt > WEATHER_EVERY || now < weatherAt)) {
             fetchingWeather = true;
             io.execute(() -> {
                 try {

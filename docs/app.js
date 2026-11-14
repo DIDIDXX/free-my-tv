@@ -256,6 +256,159 @@
     })
   );
 
+  // Guided Claude onboarding prompt generator.
+  const wizard = document.getElementById("onboardingWizard");
+  if (wizard) {
+    let selectedClub = "flamengo";
+    let selectedClubName = "Flamengo";
+    const clubBtns = [...wizard.querySelectorAll("[data-club]")];
+    const cityInput = document.getElementById("wizCity");
+    const weatherCheck = document.getElementById("wizWeather");
+    const weatherStatus = document.getElementById("wizWeatherStatus");
+    const debloatCheck = document.getElementById("wizDebloat");
+    const adguardCheck = document.getElementById("wizAdguard");
+    const ps5Check = document.getElementById("wizPs5");
+    const tmdbCheck = document.getElementById("wizTmdb");
+    const brandSelect = document.getElementById("wizBrand");
+    const ipInput = document.getElementById("wizIp");
+    const promptOut = document.getElementById("wizPrompt");
+    const copyPromptBtn = document.getElementById("wizCopyPrompt");
+
+    const buildPrompt = () => {
+      const weatherOn = weatherCheck.checked;
+      const cityVal = cityInput.value.trim();
+      const ipVal = ipInput.value.trim();
+      const brandVal = brandSelect.value;
+      const debloatOn = debloatCheck.checked;
+      const adguardOn = adguardCheck.checked;
+      const ps5On = ps5Check.checked;
+      const tmdbOn = tmdbCheck.checked;
+
+      if (pt) {
+        if (weatherOn) {
+          weatherStatus.textContent = cityVal
+            ? `Clima ativado para "${cityVal}" (o pôr do sol da cidade ajusta o tema claro/escuro).`
+            : "Digite sua cidade acima ou desmarque para gerar a versão sem clima.";
+        } else {
+          weatherStatus.textContent = "Clima desativado — sua versão vai leve e sem previsão do tempo.";
+        }
+
+        const clubLine =
+          selectedClub === "none"
+            ? "- Aba de futebol: DESATIVADA (team=none)"
+            : `- Aba de futebol: ${selectedClubName} (team=${selectedClub})`;
+        const weatherLine = weatherOn
+          ? `- Clima e pôr do sol: ATIVADO para "${cityVal || "perguntar minha cidade"}" (preencher latitude/longitude corretas em decimal no config.properties)`
+          : "- Clima e pôr do sol: DESATIVADO (weather_enabled=false, city=)";
+        const ipLine = ipVal
+          ? `- IP da TV já informado: ${ipVal}`
+          : "- IP da TV: ainda não sei — me guie passo a passo para ligar o Modo Desenvolvedor, ativar Depuração USB e pegar o IP na TV";
+
+        promptOut.textContent = [
+          "Quero instalar o Free My TV (fork com performance otimizada e aba de clube) na minha TV.",
+          "Aja como um técnico paciente e amigo: conduza o onboarding UMA ETAPA CURTA POR VEZ em português simples, esperando minha resposta antes de mandar o próximo comando.",
+          "",
+          "Minhas escolhas do site:",
+          `- Repositório: https://github.com/DIDIDXX/free-my-tv (branch tcl-performance)`,
+          `- Marca / sistema da TV: ${brandVal}`,
+          ipLine,
+          clubLine,
+          weatherLine,
+          `- Otimizar apps lentos e desativar launcher original sem apagar nada: ${debloatOn ? "SIM" : "NÃO"}`,
+          `- Ativar DNS Privado AdGuard (dns.adguard-dns.com) para cortar anúncios no sistema: ${adguardOn ? "SIM" : "NÃO"}`,
+          `- Ativar ajuste automático de volume para PS5 no HDMI 1: ${ps5On ? "SIM" : "NÃO"}`,
+          `- Recomendações de filmes/séries via TMDB grátis: ${tmdbOn ? "SIM (me ajude a gerar e colar minha chave grátis em config.properties sem expor aqui)" : "NÃO (deixar tmdb_key= vazio e instalar direto)"}`,
+          "",
+          "Como começar agora:",
+          "1. Se o repositório ainda não estiver clonado aqui, faça `git clone -b tcl-performance https://github.com/DIDIDXX/free-my-tv.git && cd free-my-tv` e leia o `CLAUDE.md`.",
+          "2. Verifique no computador o que já está instalado (JDK 17+, Android SDK e adb) sem me inundar com texto.",
+          "3. Me diga apenas o primeiro passo bem mastigado para eu fazer no controle da TV (ativar Opções do Desenvolvedor / Depuração USB e pegar o IP) e aguarde meu retorno."
+        ].join("\n");
+      } else {
+        if (weatherOn) {
+          weatherStatus.textContent = cityVal
+            ? `Weather enabled for "${cityVal}" (real sunset drives the day/night look).`
+            : "Type your city above, or uncheck to build with weather disabled.";
+        } else {
+          weatherStatus.textContent = "Weather disabled — your build skips weather & Open-Meteo completely.";
+        }
+
+        const clubLine =
+          selectedClub === "none"
+            ? "- Football club tab: DISABLED (team=none)"
+            : `- Football club tab: ${selectedClubName} (team=${selectedClub})`;
+        const weatherLine = weatherOn
+          ? `- Weather & sunset: ENABLED for "${cityVal || "ask my city"}" (fill decimal latitude/longitude in config.properties)`
+          : "- Weather & sunset: DISABLED (weather_enabled=false, city=)";
+        const ipLine = ipVal
+          ? `- TV IP provided: ${ipVal}`
+          : "- TV IP: unknown yet — walk me step by step through enabling Developer Options, USB debugging, and finding the TV IP";
+
+        promptOut.textContent = [
+          "I want to install Free My TV (TCL performance fork with optional club dashboard) on my TV.",
+          "Act as a friendly, patient technician: guide me ONE SHORT STEP AT A TIME in plain language, waiting for my reply before moving to the next step.",
+          "",
+          "My choices from the website:",
+          "- Repository: https://github.com/DIDIDXX/free-my-tv (branch tcl-performance)",
+          `- TV brand / OS: ${brandVal}`,
+          ipLine,
+          clubLine,
+          weatherLine,
+          `- Optimize bloatware & disable stock launcher safely via ADB (reversible): ${debloatOn ? "YES" : "NO"}`,
+          `- Enable AdGuard Private DNS (dns.adguard-dns.com): ${adguardOn ? "YES" : "NO"}`,
+          `- Enable PS5 HDMI-1 auto volume mode: ${ps5On ? "YES" : "NO"}`,
+          `- Include TMDB movie/show picks: ${tmdbOn ? "YES (guide me to create a free TMDB key and paste it into config.properties)" : "NO (leave tmdb_key= empty)"}`,
+          "",
+          "Start now:",
+          "1. If the repo isn't cloned yet, run `git clone -b tcl-performance https://github.com/DIDIDXX/free-my-tv.git && cd free-my-tv` and read `CLAUDE.md`.",
+          "2. Quietly check JDK 17+, Android SDK build-tools/platform-34, and adb.",
+          "3. Give me just the first simple step to do with my TV remote and wait for my reply."
+        ].join("\n");
+      }
+    };
+
+    clubBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        clubBtns.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+        selectedClub = btn.dataset.club;
+        selectedClubName = btn.dataset.name || btn.textContent.trim();
+        buildPrompt();
+      });
+    });
+
+    weatherCheck.addEventListener("change", () => {
+      cityInput.disabled = !weatherCheck.checked;
+      buildPrompt();
+    });
+
+    [cityInput, debloatCheck, adguardCheck, ps5Check, tmdbCheck, brandSelect, ipInput].forEach((el) => {
+      el.addEventListener("input", buildPrompt);
+      el.addEventListener("change", buildPrompt);
+    });
+
+    const defaultLabel = copyPromptBtn.textContent;
+    copyPromptBtn.addEventListener("click", async () => {
+      const text = promptOut.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(promptOut);
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      copyPromptBtn.textContent = pt ? "Prompt copiado! Cole no Claude ✓" : "Prompt copied! Paste into Claude ✓";
+      copyPromptBtn.classList.add("done");
+      setTimeout(() => {
+        copyPromptBtn.textContent = defaultLabel;
+        copyPromptBtn.classList.remove("done");
+      }, 2200);
+    });
+
+    buildPrompt();
+  }
+
   // The film.
   const film = document.getElementById("film");
   const filmVideo = film.querySelector("video");

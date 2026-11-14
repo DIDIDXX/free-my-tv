@@ -105,14 +105,14 @@ public final class LegacyHomeBridge extends AccessibilityService {
     }
     private static void open(Context c) {
         boolean free = chosen(c) && !Watchdog.crashedTooOften(c);
-        Intent i = new Intent().setClassName(free ? "io.freemytv" : "com.overdevs.at4k",
-                free ? "io.freemytv.HomeActivity" : "com.overdevs.at4k.MainActivity")
+        Intent i = new Intent().setClassName(free ? "io.freemytv" : "com.google.android.apps.tv.launcherx",
+                free ? "io.freemytv.HomeActivity" : "com.google.android.apps.tv.launcherx.home.HomeActivity")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         try { c.startActivity(i); } catch (RuntimeException e) { AppLog.w("Home redirect: " + e.getMessage()); }
     }
     @Override protected void onServiceConnected() {
         Watchdog.install(this);
-        registerPs5Monitor();
+        if (Config.PS5_HDMI_VOLUME) registerPs5Monitor();
         android.content.SharedPreferences prefs = getSharedPreferences("tcl_home", MODE_PRIVATE);
         boolean first = !prefs.contains("chosen");
         if (first) prefs.edit().putBoolean("chosen", true).commit();
