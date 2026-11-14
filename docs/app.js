@@ -409,6 +409,33 @@
     buildPrompt();
   }
 
+  // Hero preview switcher (Club dashboard screenshot vs live Home video).
+  const heroStage = document.getElementById("heroTv");
+  const viewButtons = [...document.querySelectorAll("[data-hero-view]")];
+  if (heroStage && viewButtons.length) {
+    const panels = [...heroStage.querySelectorAll("[data-hero-panel]")];
+    const setHeroView = (mode) => {
+      for (const b of viewButtons) {
+        const active = b.dataset.heroView === mode;
+        b.setAttribute("aria-pressed", String(active));
+      }
+      for (const p of panels) {
+        const show = p.dataset.heroPanel === mode;
+        p.hidden = !show;
+        const vid = p.querySelector("video");
+        if (vid) {
+          if (show) {
+            if (!vid.getAttribute("src") && vid.dataset.src) vid.src = vid.dataset.src;
+            if (!reduce) vid.play().catch(() => {});
+          } else {
+            vid.pause();
+          }
+        }
+      }
+    };
+    viewButtons.forEach((b) => b.addEventListener("click", () => setHeroView(b.dataset.heroView)));
+  }
+
   // The film.
   const film = document.getElementById("film");
   const filmVideo = film.querySelector("video");

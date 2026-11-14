@@ -4,32 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <script>
-    // Portuguese page: back to English only if the visitor picked it with the PT/EN switch.
     (function () {
       var lang;
       try { lang = localStorage.getItem("lang"); } catch (e) {}
       if (lang === "en") location.replace("../" + location.search + location.hash);
     })();
   </script>
-  <title>Free My TV — uma tela inicial rápida e sem anúncios para sua Google TV</title>
-  <meta name="description" content="Tela inicial de código aberto para Google TV e Android TV (Android 11–14+). Sem anúncios, a 60 fps, com aba do seu time, todos os apps e visual que acompanha o pôr do sol. Configure no site e deixe o Claude instalar passo a passo.">
+  <title>Free My TV (Fork TCL) — Monte sua tela inicial e instale com 1 prompt</title>
+  <meta name="description" content="Fork do Free My TV otimizado para TCL Android 11 e Google TV: botão Home sem flash, aba Aplicativos completa, aba do seu time do Brasileirão ao vivo e onboarding guiado pelo Claude com 1 prompt.">
   <link rel="canonical" href="https://dididxx.github.io/free-my-tv/pt/">
   <link rel="alternate" hreflang="en" href="https://dididxx.github.io/free-my-tv/">
   <link rel="alternate" hreflang="pt-BR" href="https://dididxx.github.io/free-my-tv/pt/">
   <link rel="alternate" hreflang="x-default" href="https://dididxx.github.io/free-my-tv/">
-  <meta name="theme-color" content="#F5F5F7">
+  <meta name="theme-color" content="#070A0F">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="pt_BR">
   <meta property="og:locale:alternate" content="en_US">
   <meta property="og:url" content="https://dididxx.github.io/free-my-tv/pt/">
-  <meta property="og:title" content="Free My TV">
-  <meta property="og:description" content="Configure sua TV no site, copie o prompt pronto e deixe o Claude guiar a instalação passo a passo.">
+  <meta property="og:title" content="Free My TV · Fork TCL &amp; Onboarding com Claude">
+  <meta property="og:description" content="Configure seu time, cidade (ou desative o clima), copie o prompt e deixe o Claude guiar a instalação na TV passo a passo.">
   <meta property="og:image" content="https://dididxx.github.io/free-my-tv/assets/og-pt.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Free My TV">
-  <meta name="twitter:description" content="Tela inicial rápida e sem anúncios para Google TV e Android TV. Código aberto.">
+  <meta name="twitter:title" content="Free My TV · Fork TCL">
+  <meta name="twitter:description" content="Launcher limpa, rápida e configurável por prompt para Google TV / Android TV.">
   <meta name="twitter:image" content="https://dididxx.github.io/free-my-tv/assets/og-pt.jpg">
   <link rel="icon" type="image/png" href="../assets/favicon-64.png">
   <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
@@ -37,270 +36,181 @@
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-  <div class="sky" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <div class="studio-bg" aria-hidden="true"></div>
 
   <header class="nav" id="nav">
-    <a class="brand" href="#top" aria-label="Free My TV, voltar ao topo">
-      <img src="../assets/icon-512.png" alt="" width="30" height="30">
-      <span>Free My TV</span>
-    </a>
-    <nav class="links" aria-label="Seções">
-      <a href="#features">Recursos</a>
-      <a href="#how">Como funciona</a>
-      <a href="#install">Configurar e instalar</a>
-      <a href="#faq">Dúvidas</a>
-    </nav>
-    <div class="nav-end">
-      <a class="lang" href="../" hreflang="en" lang="en" data-lang="en" aria-label="Read in English">EN</a>
-      <a class="btn btn-dark btn-sm" href="https://github.com/DIDIDXX/free-my-tv" rel="noopener">
-      <svg class="gh" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-      <span>GitHub</span>
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="Free My TV Fork, voltar ao topo">
+        <img src="../assets/icon-512.png" alt="" width="28" height="28">
+        <span>Free My TV</span>
       </a>
+      <span class="fork-tag">Fork TCL · Android 11+</span>
+
+      <nav class="links" aria-label="Seções">
+        <a href="#install">Gerar prompt</a>
+        <a href="#features">Novidades do fork</a>
+        <a href="#compare">Comparar</a>
+        <a href="#faq">Dúvidas</a>
+      </nav>
+
+      <div class="nav-end">
+        <a class="lang" href="../" hreflang="en" lang="en" data-lang="en" aria-label="Read in English">EN</a>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/DIDIDXX/free-my-tv" rel="noopener">
+          <svg class="gh" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
     </div>
   </header>
 
   <main id="top">
     <!-- Hero -->
     <section class="hero">
-      <div class="hero-copy">
-        <p class="kicker" data-reveal>Código aberto · Google TV &amp; Android TV 11+</p>
-        <h1 data-reveal>Liberte sua <span class="grad">TV.</span></h1>
-        <p class="lede" data-reveal>Troque a tela inicial cheia de anúncios e lentidão por uma rápida, limpa e com a sua cara — com seu time do Brasileirão, seus aplicativos em tela cheia e clima ao vivo. Configure aqui em segundos e cole o prompt no Claude.</p>
-        <div class="cta" data-reveal>
-          <a class="btn btn-dark" href="#install">Montar e copiar prompt <span aria-hidden="true">→</span></a>
-          <button class="btn btn-glass" type="button" data-film><span class="play" aria-hidden="true"></span>Assista ao filme de 45s</button>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="fork-pill" data-reveal><i></i>Fork comunitário de FreeMyTV · TCL &amp; Série A</span>
+          <h1 data-reveal>Sua Google TV sem anúncios — <span class="grad">pronta em um prompt.</span></h1>
+          <p class="lede" data-reveal>Escolha seu time, sua cidade (ou desligue o clima) e copie um prompt único para colar no Claude. Ele explica cada clique no controle remoto — de ligar a depuração e pegar o IP até instalar uma tela inicial a 60 fps.</p>
+          <div class="cta" data-reveal>
+            <a class="btn btn-primary" href="#install">Configurar e copiar prompt <span aria-hidden="true">↓</span></a>
+            <button class="btn btn-ghost" type="button" data-film><span class="play" aria-hidden="true"></span>Ver demo (45s)</button>
+          </div>
+          <p class="built" data-reveal>Fork otimizado por <b>DIDIDXX</b> · baseado no projeto <a href="https://github.com/simbasjungles/free-my-tv" rel="noopener">simbasjungles/free-my-tv</a> (<a href="https://freemytv.io/pt/" rel="noopener">freemytv.io</a>) · MIT</p>
         </div>
-        <p class="built" data-reveal>Fork otimizado por <b>DIDIDXX</b> · baseado em <a href="https://github.com/simbasjungles/free-my-tv" rel="noopener">simbasjungles/free-my-tv</a> · licença MIT</p>
-      </div>
-      <div class="hero-stage" data-reveal>
-        <div class="tv tilt" id="heroTv">
-          <div class="screen">
-            <video data-src="../assets/nav.mp4" poster="../assets/nav-poster.webp" muted loop playsinline preload="none" aria-label="A tela inicial do Free My TV, passando pelos apps"></video>
+
+        <div class="hero-showcase" data-reveal>
+          <div class="stage-bar">
+            <span class="stage-label">Preview real · TCL Android 11</span>
+            <div class="view-switch" role="group" aria-label="Alternar prévia da TV">
+              <button type="button" data-hero-view="club" aria-pressed="true">Aba do Time</button>
+              <button type="button" data-hero-view="home" aria-pressed="false">Home &amp; Apps</button>
+            </div>
+          </div>
+          <div class="tv" id="heroTv">
+            <div class="screen">
+              <img data-hero-panel="club" src="../assets/club-tab.webp" alt="Aba Flamengo em execução numa TCL Android 11 com classificação, últimos e próximos jogos">
+              <video data-hero-panel="home" hidden data-src="../assets/nav.mp4" poster="../assets/nav-poster.webp" muted loop playsinline preload="none" aria-label="Tela inicial limpa navegando pelos aplicativos"></video>
+            </div>
           </div>
         </div>
-        <div class="floor" aria-hidden="true"></div>
       </div>
+
       <ul class="stats" data-reveal>
-        <li><b>1,02%</b><span>engasgos (antes: 49,8%) na TCL Android 11</span></li>
-        <li><b>−63%</b><span>memória no processo Home</span></li>
-        <li><b>0</b><span>anúncios, banners ou promoções</span></li>
-        <li><b>1 botão</b><span>para voltar ao original</span></li>
+        <li><b>1,02%</b><span>engasgos na TCL Android 11 (antes: 49,8%)</span></li>
+        <li><b>−63%</b><span>memória RAM no processo Home</span></li>
+        <li><b>Home direta</b><span>sem piscar a launcher da TCL</span></li>
+        <li><b>20 clubes</b><span>Série A ao vivo ou desativada</span></li>
       </ul>
     </section>
 
-    <!-- Before / after -->
-    <section class="section compare" id="compare">
-      <div class="head" data-reveal>
-        <p class="kicker">Antes → depois</p>
-        <h2>Sua tela inicial não deveria ser um outdoor.</h2>
-        <p class="sub">Arraste para comparar. Mesma TV, mesmos apps, sem as fileiras patrocinadas e sem engasgos no controle.</p>
-      </div>
-      <div class="tv ba" id="ba" data-reveal tabindex="0" role="slider" aria-label="Compare a tela inicial de fábrica com o Free My TV" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-        <div class="screen">
-          <img class="after" src="../assets/home-day.webp" alt="A tela inicial do Free My TV: três destaques e uma prateleira de vidro com os apps" loading="lazy">
-          <div class="before-wrap"><img class="before" src="../assets/before.webp" alt="Uma tela inicial de fábrica típica, cheia de fileiras patrocinadas (ilustração)" loading="lazy"></div>
-          <span class="tag tag-l">Tela de fábrica <em>(ilustração)</em></span>
-          <span class="tag tag-r">Free My TV</span>
-          <div class="handle" aria-hidden="true"><span></span></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section class="section features" id="features">
-      <article class="feature" data-reveal>
-        <div class="copy">
-          <p class="kicker">Início &amp; Aplicativos</p>
-          <h3>Seus apps em primeiro lugar — sem engasgos.</h3>
-          <p>Dock com vidro translúcido para seus apps favoritos e uma aba completa <em>Aplicativos</em> em grade 16:9 com tudo instalado na TV. Renderização em camadas cacheadas pensada para TVs modestas com Android 11–14+.</p>
-        </div>
-        <div class="tv"><div class="screen"><video data-src="../assets/nav.mp4" poster="../assets/nav-poster.webp" muted loop playsinline preload="none" aria-label="Navegando pela prateleira de apps"></video></div></div>
-      </article>
-
-      <article class="feature flip" data-reveal>
-        <div class="copy">
-          <p class="kicker">Seu Time &amp; Destaques</p>
-          <h3>Brasileirão ao vivo e destaques sem propaganda.</h3>
-          <p>Escolha seu clube na configuração abaixo: ganhe uma aba exclusiva com classificação em tempo real, últimos 5 jogos (abrindo melhores momentos no SmartTube/YouTube) e próximos jogos convertidos para o seu fuso horário.</p>
-        </div>
-        <div class="tv"><div class="screen"><video data-src="../assets/tabs.mp4" poster="../assets/tabs-poster.webp" muted loop playsinline preload="none" aria-label="Trocando entre as abas da tela inicial"></video></div></div>
-      </article>
-
-      <article class="feature" data-reveal>
-        <div class="copy">
-          <p class="kicker">Velocidade</p>
-          <h3>Clima e cotações a um toque.</h3>
-          <p>Aperte para baixo e veja previsão hora a hora, nascer/pôr do sol e cotações em reais (ou prefira a versão leve com o clima desativado). Tudo em quadros no tempo certo na GPU da própria TV.</p>
-          <div class="hud" aria-hidden="true"><i></i><b>60 FPS</b><svg viewBox="0 0 120 24" preserveAspectRatio="none"><polyline id="spark" fill="none" points=""/></svg><span>10 ms p95</span></div>
-        </div>
-        <div class="tv"><div class="screen"><video data-src="../assets/drawer.mp4" poster="../assets/drawer-poster.webp" muted loop playsinline preload="none" aria-label="A gaveta com o clima e as cotações de cripto abrindo"></video></div></div>
-      </article>
-    </section>
-
-    <!-- Sunset: scroll to go from day to night -->
-    <section class="sunset" id="sunset" aria-label="Claro de dia, escuro à noite">
-      <div class="sticky">
-        <div class="stars" aria-hidden="true"></div>
-        <div class="sun" aria-hidden="true"></div>
-        <div class="moon" aria-hidden="true"></div>
-        <div class="head">
-          <p class="kicker"><span class="clock" id="sunClock">17:20</span> · o pôr do sol da sua cidade</p>
-          <h2><span class="w-day">Claro de dia.</span> <span class="w-night">Escuro à noite.</span></h2>
-          <p class="sub">Informe sua cidade no configurador abaixo para acompanhar o clima e o pôr do sol real onde você mora — ou desative para deixar a versão ainda mais minimalista.</p>
-        </div>
-        <div class="tv"><div class="screen">
-          <img src="../assets/day.webp" alt="A tela inicial durante o dia" loading="lazy">
-          <img class="night" src="../assets/night.webp" alt="A mesma tela inicial à noite" loading="lazy">
-        </div></div>
-      </div>
-    </section>
-
-    <!-- Numbers -->
-    <section class="section numbers" id="numbers">
-      <div class="head" data-reveal>
-        <p class="kicker">Medido numa TCL Android 11 real</p>
-        <h2>Mais leve, mais rápida, mais limpa.</h2>
-        <p class="sub">Antes e depois das otimizações de renderização e limpeza na mesma TCL Google TV / Android TV.</p>
-      </div>
-      <div class="cards">
-        <div class="card" data-reveal><b class="big grad-mint"><span data-count="10">0</span><small>ms p95</small></b><h4>Fluido</h4><p>Quadros com engasgo caíram de 49,84% para 1,02% na navegação.</p></div>
-        <div class="card" data-reveal><b class="big grad-sky">−<span data-count="63">0</span>%</b><h4>Memória PSS</h4>
-          <div class="bars"><div><span>Antes</span><i style="--w:100%"></i><em>321 MB</em></div><div><span>Depois</span><i style="--w:37%"></i><em>117 MB</em></div></div>
-        </div>
-        <div class="card" data-reveal><b class="big grad-sun">0</b><h4>Anúncios</h4><p>Nenhum banner ou fileira patrocinada. E DNS AdGuard opcional na instalação.</p></div>
-      </div>
-    </section>
-
-    <!-- How it works -->
-    <section class="section how" id="how">
-      <div class="head" data-reveal>
-        <p class="kicker">Como funciona</p>
-        <h2>Sem root. Sem complicação. Passo a passo com IA.</h2>
-      </div>
-      <ol class="steps">
-        <li class="step" data-reveal>
-          <span class="num">1</span>
-          <h4>Responda 4 perguntas aqui</h4>
-          <p>Escolha seu time, sua cidade (ou desative o clima) e os extras que quiser. O site gera um prompt pronto com suas preferências.</p>
-        </li>
-        <li class="step" data-reveal>
-          <span class="num">2</span>
-          <h4>Cole no Claude Code</h4>
-          <p>O Claude vira seu técnico pessoal: ensina bem mastigado como ativar a depuração na TV, pegar o IP, compilar e instalar sem dor de cabeça.</p>
-        </li>
-        <li class="step" data-reveal>
-          <span class="num">3</span>
-          <h4>Desfaça com 1 clique</h4>
-          <p>Nada de sistema é apagado — apenas desativado de forma reversível. O modo Original restaura tudo como veio de fábrica.</p>
-        </li>
-      </ol>
-    </section>
-
-    <!-- Install / Interactive Onboarding Generator -->
+    <!-- Primary Onboarding Prompt Builder -->
     <section class="section install" id="install">
       <div class="head" data-reveal>
-        <p class="kicker">Onboarding</p>
-        <h2>Monte sua versão e copie o prompt para o Claude.</h2>
-        <p class="sub">Zero código manual: responda abaixo, copie o texto gerado e solte no seu Claude para ele te guiar passo a passo com a TV.</p>
+        <p class="kicker">Passo 01 · Configurador</p>
+        <h2>Monte sua versão e copie o prompt pro Claude.</h2>
+        <p class="sub">Você não precisa decorar comandos ADB. Responda aqui em 15 segundos, copie o prompt gerado ao lado e deixe o Claude conduzir cada etapa com você na frente da TV.</p>
       </div>
+
       <div class="panel" data-reveal>
         <div class="tabs" role="tablist" aria-label="Forma de instalar">
-          <button role="tab" aria-selected="true" aria-controls="tab-claude" id="t-claude">Onboarding com Claude</button>
-          <button role="tab" aria-selected="false" aria-controls="tab-manual" id="t-manual">Instalação manual</button>
+          <button role="tab" aria-selected="true" aria-controls="tab-claude" id="t-claude">Onboarding guiado com Claude</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-manual" id="t-manual">Comandos manuais (ADB)</button>
         </div>
 
         <div class="tabpanel" id="tab-claude" role="tabpanel" aria-labelledby="t-claude">
-          <div class="wizard" id="onboardingWizard">
-            <!-- 1. Club -->
-            <div class="w-step">
-              <div class="w-head"><span class="w-badge">1</span><h4>Qual é o seu time?</h4></div>
-              <p class="w-desc">Adiciona uma aba exclusiva com tabela do Brasileirão, últimos jogos + melhores momentos no YouTube e próximos jogos ao vivo. Se preferir sem futebol, escolha “Desativado”.</p>
-              <div class="w-clubs" role="group" aria-label="Escolha seu time">
-                <button class="club-pill" type="button" data-club="none" data-name="Desativado" aria-pressed="false"><span class="club-dot" style="--dot:#8e8e93"></span>Desativado</button>
-                <button class="club-pill" type="button" data-club="flamengo" data-name="Flamengo" aria-pressed="true"><span class="club-dot" style="--dot:#d92332"></span>Flamengo</button>
-                <button class="club-pill" type="button" data-club="palmeiras" data-name="Palmeiras" aria-pressed="false"><span class="club-dot" style="--dot:#16a34a"></span>Palmeiras</button>
-                <button class="club-pill" type="button" data-club="corinthians" data-name="Corinthians" aria-pressed="false"><span class="club-dot" style="--dot:#111827"></span>Corinthians</button>
-                <button class="club-pill" type="button" data-club="sao-paulo" data-name="São Paulo" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>São Paulo</button>
-                <button class="club-pill" type="button" data-club="vasco" data-name="Vasco" aria-pressed="false"><span class="club-dot" style="--dot:#1f2937"></span>Vasco</button>
-                <button class="club-pill" type="button" data-club="fluminense" data-name="Fluminense" aria-pressed="false"><span class="club-dot" style="--dot:#9f1239"></span>Fluminense</button>
-                <button class="club-pill" type="button" data-club="botafogo" data-name="Botafogo" aria-pressed="false"><span class="club-dot" style="--dot:#334155"></span>Botafogo</button>
-                <button class="club-pill" type="button" data-club="gremio" data-name="Grêmio" aria-pressed="false"><span class="club-dot" style="--dot:#0284c7"></span>Grêmio</button>
-                <button class="club-pill" type="button" data-club="internacional" data-name="Internacional" aria-pressed="false"><span class="club-dot" style="--dot:#b91c1c"></span>Internacional</button>
-                <button class="club-pill" type="button" data-club="cruzeiro" data-name="Cruzeiro" aria-pressed="false"><span class="club-dot" style="--dot:#2563eb"></span>Cruzeiro</button>
-                <button class="club-pill" type="button" data-club="atletico-mg" data-name="Atlético-MG" aria-pressed="false"><span class="club-dot" style="--dot:#18181b"></span>Atlético-MG</button>
-                <button class="club-pill" type="button" data-club="bahia" data-name="Bahia" aria-pressed="false"><span class="club-dot" style="--dot:#2563eb"></span>Bahia</button>
-                <button class="club-pill" type="button" data-club="santos" data-name="Santos" aria-pressed="false"><span class="club-dot" style="--dot:#64748b"></span>Santos</button>
-                <button class="club-pill" type="button" data-club="athletico-pr" data-name="Athletico-PR" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>Athletico-PR</button>
-                <button class="club-pill" type="button" data-club="bragantino" data-name="Bragantino" aria-pressed="false"><span class="club-dot" style="--dot:#e11d48"></span>Bragantino</button>
-                <button class="club-pill" type="button" data-club="coritiba" data-name="Coritiba" aria-pressed="false"><span class="club-dot" style="--dot:#15803d"></span>Coritiba</button>
-                <button class="club-pill" type="button" data-club="vitoria" data-name="Vitória" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>Vitória</button>
-                <button class="club-pill" type="button" data-club="mirassol" data-name="Mirassol" aria-pressed="false"><span class="club-dot" style="--dot:#eab308"></span>Mirassol</button>
-                <button class="club-pill" type="button" data-club="remo" data-name="Remo" aria-pressed="false"><span class="club-dot" style="--dot:#1d4ed8"></span>Remo</button>
-                <button class="club-pill" type="button" data-club="chapecoense" data-name="Chapecoense" aria-pressed="false"><span class="club-dot" style="--dot:#16a34a"></span>Chapecoense</button>
+          <div class="wizard-layout" id="onboardingWizard">
+            <div class="wizard-steps">
+              <!-- 1. Club -->
+              <div class="w-step">
+                <div class="w-head"><span class="w-badge">1</span><h4>Qual é o seu time?</h4></div>
+                <p class="w-desc">Cria uma aba dedicada com tabela do Brasileirão, últimos 5 jogos (com melhores momentos no YouTube) e agenda ao vivo de todas as competições. Não quer futebol? Clique em “Desativado”.</p>
+                <div class="w-clubs" role="group" aria-label="Escolha seu time">
+                  <button class="club-pill" type="button" data-club="none" data-name="Desativado" aria-pressed="false"><span class="club-dot" style="--dot:#94a3b8"></span>Desativado</button>
+                  <button class="club-pill" type="button" data-club="flamengo" data-name="Flamengo" aria-pressed="true"><span class="club-dot" style="--dot:#d92332"></span>Flamengo</button>
+                  <button class="club-pill" type="button" data-club="palmeiras" data-name="Palmeiras" aria-pressed="false"><span class="club-dot" style="--dot:#16a34a"></span>Palmeiras</button>
+                  <button class="club-pill" type="button" data-club="corinthians" data-name="Corinthians" aria-pressed="false"><span class="club-dot" style="--dot:#334155"></span>Corinthians</button>
+                  <button class="club-pill" type="button" data-club="sao-paulo" data-name="São Paulo" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>São Paulo</button>
+                  <button class="club-pill" type="button" data-club="vasco" data-name="Vasco" aria-pressed="false"><span class="club-dot" style="--dot:#475569"></span>Vasco</button>
+                  <button class="club-pill" type="button" data-club="fluminense" data-name="Fluminense" aria-pressed="false"><span class="club-dot" style="--dot:#9f1239"></span>Fluminense</button>
+                  <button class="club-pill" type="button" data-club="botafogo" data-name="Botafogo" aria-pressed="false"><span class="club-dot" style="--dot:#64748b"></span>Botafogo</button>
+                  <button class="club-pill" type="button" data-club="gremio" data-name="Grêmio" aria-pressed="false"><span class="club-dot" style="--dot:#0284c7"></span>Grêmio</button>
+                  <button class="club-pill" type="button" data-club="internacional" data-name="Internacional" aria-pressed="false"><span class="club-dot" style="--dot:#b91c1c"></span>Internacional</button>
+                  <button class="club-pill" type="button" data-club="cruzeiro" data-name="Cruzeiro" aria-pressed="false"><span class="club-dot" style="--dot:#2563eb"></span>Cruzeiro</button>
+                  <button class="club-pill" type="button" data-club="atletico-mg" data-name="Atlético-MG" aria-pressed="false"><span class="club-dot" style="--dot:#3f3f46"></span>Atlético-MG</button>
+                  <button class="club-pill" type="button" data-club="bahia" data-name="Bahia" aria-pressed="false"><span class="club-dot" style="--dot:#2563eb"></span>Bahia</button>
+                  <button class="club-pill" type="button" data-club="santos" data-name="Santos" aria-pressed="false"><span class="club-dot" style="--dot:#94a3b8"></span>Santos</button>
+                  <button class="club-pill" type="button" data-club="athletico-pr" data-name="Athletico-PR" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>Athletico-PR</button>
+                  <button class="club-pill" type="button" data-club="bragantino" data-name="Bragantino" aria-pressed="false"><span class="club-dot" style="--dot:#e11d48"></span>Bragantino</button>
+                  <button class="club-pill" type="button" data-club="coritiba" data-name="Coritiba" aria-pressed="false"><span class="club-dot" style="--dot:#15803d"></span>Coritiba</button>
+                  <button class="club-pill" type="button" data-club="vitoria" data-name="Vitória" aria-pressed="false"><span class="club-dot" style="--dot:#dc2626"></span>Vitória</button>
+                  <button class="club-pill" type="button" data-club="mirassol" data-name="Mirassol" aria-pressed="false"><span class="club-dot" style="--dot:#eab308"></span>Mirassol</button>
+                  <button class="club-pill" type="button" data-club="remo" data-name="Remo" aria-pressed="false"><span class="club-dot" style="--dot:#1d4ed8"></span>Remo</button>
+                  <button class="club-pill" type="button" data-club="chapecoense" data-name="Chapecoense" aria-pressed="false"><span class="club-dot" style="--dot:#16a34a"></span>Chapecoense</button>
+                </div>
+              </div>
+
+              <!-- 2. City & Weather -->
+              <div class="w-step">
+                <div class="w-head"><span class="w-badge">2</span><h4>Qual é a sua cidade?</h4></div>
+                <p class="w-desc">Serve para mostrar o clima na TV e alternar entre visual claro/escuro conforme o pôr do sol real onde você mora. Desmarque para compilar uma versão enxuta com o clima totalmente desligado.</p>
+                <div class="w-row">
+                  <input class="w-input" id="wizCity" type="text" placeholder="Ex: São Paulo, SP" value="São Paulo, SP" aria-label="Sua cidade">
+                  <label class="w-check">
+                    <input id="wizWeather" type="checkbox" checked>
+                    <span>Ativar clima e pôr do sol</span>
+                  </label>
+                </div>
+                <p class="w-status" id="wizWeatherStatus"></p>
+              </div>
+
+              <!-- 3. Extras -->
+              <div class="w-step">
+                <div class="w-head"><span class="w-badge">3</span><h4>Otimizações e extras</h4></div>
+                <p class="w-desc">Todas as escolhas são reversíveis — nada é desinstalado da TV.</p>
+                <div class="w-checks">
+                  <label class="w-check">
+                    <input id="wizDebloat" type="checkbox" checked>
+                    <span><b>Desativar launcher original + bloatware da TV (reversível)</b><small>Elimina banners patrocinados e deixa o botão Home instantâneo sem piscar a tela de fábrica.</small></span>
+                  </label>
+                  <label class="w-check">
+                    <input id="wizAdguard" type="checkbox" checked>
+                    <span><b>DNS Privado AdGuard (dns.adguard-dns.com)</b><small>Filtra telemetria e anúncios no nível de rede em toda a TV.</small></span>
+                  </label>
+                  <label class="w-check">
+                    <input id="wizPs5" type="checkbox">
+                    <span><b>Modo Console / PlayStation 5 no HDMI 1</b><small>Ajusta automaticamente o volume quando o HDMI 1 é selecionado (volume reduzido à noite).</small></span>
+                  </label>
+                  <label class="w-check">
+                    <input id="wizTmdb" type="checkbox">
+                    <span><b>Destaques de filmes e séries via TMDB</b><small>Se marcar, o Claude ajuda a gerar sua chave grátis do TMDB. Desmarcado = vai direto sem cadastro.</small></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 4. Brand & IP -->
+              <div class="w-step">
+                <div class="w-head"><span class="w-badge">4</span><h4>Marca da TV e IP (opcional)</h4></div>
+                <p class="w-desc">Não sabe o IP ainda? Deixe vazio — o prompt manda o Claude ensinar como ativar a depuração e achar o IP direto no menu da TV.</p>
+                <div class="w-row">
+                  <select class="w-select" id="wizBrand" aria-label="Marca da TV">
+                    <option value="TCL (Google TV / Android TV)">TCL (Google TV / Android TV)</option>
+                    <option value="Outra Google TV / Android TV (Sony, Hisense, Philips, Xiaomi, Chromecast)">Outra Google TV / Android TV</option>
+                    <option value="Detectar automaticamente via ADB">Não sei — detectar via ADB</option>
+                  </select>
+                  <input class="w-input" id="wizIp" type="text" placeholder="IP da TV (opcional, ex: 192.168.15.50)" aria-label="IP da TV opcional">
+                </div>
               </div>
             </div>
 
-            <!-- 2. City & Weather -->
-            <div class="w-step">
-              <div class="w-head"><span class="w-badge">2</span><h4>Qual é a sua cidade?</h4></div>
-              <p class="w-desc">Usada para mostrar a previsão do tempo na tela inicial e trocar automaticamente para o modo escuro na hora do pôr do sol da sua região. Se não quiser clima, basta desmarcar — sua versão vai com tudo isso desativado.</p>
-              <div class="w-row">
-                <input class="w-input" id="wizCity" type="text" placeholder="Ex: São Paulo, SP" value="São Paulo, SP" aria-label="Sua cidade">
-                <label class="w-check">
-                  <input id="wizWeather" type="checkbox" checked>
-                  <span>Ativar clima e pôr do sol ao vivo</span>
-                </label>
-              </div>
-              <p class="w-status" id="wizWeatherStatus"></p>
-            </div>
-
-            <!-- 3. Extras -->
-            <div class="w-step">
-              <div class="w-head"><span class="w-badge">3</span><h4>O que mais você quer ativar?</h4></div>
-              <p class="w-desc">Personalize o comportamento da TV. Tudo é opcional e reversível.</p>
-              <div class="w-checks">
-                <label class="w-check">
-                  <input id="wizDebloat" type="checkbox" checked>
-                  <span><b>Desativar launcher original e apps inúteis da TV (sem apagar nada)</b><small>Remove propagandas e travamentos com botão Home instantâneo — volta com 1 clique no modo Original.</small></span>
-                </label>
-                <label class="w-check">
-                  <input id="wizAdguard" type="checkbox" checked>
-                  <span><b>Bloquear anúncios e telemetria no sistema via DNS Privado (AdGuard)</b><small>Usa dns.adguard-dns.com nas configurações de rede da TV para cortar rastreadores.</small></span>
-                </label>
-                <label class="w-check">
-                  <input id="wizPs5" type="checkbox">
-                  <span><b>Modo Gamer / PlayStation 5 no HDMI 1</b><small>Detecta quando você liga o console no HDMI 1 e ajusta o volume automaticamente (mais baixo à noite).</small></span>
-                </label>
-                <label class="w-check">
-                  <input id="wizTmdb" type="checkbox">
-                  <span><b>Incluir recomendações de filmes e séries (TMDB grátis)</b><small>Se marcar, o Claude te ajuda a criar uma chave grátis do TMDB. Desmarcado = vai direto sem pedir cadastro.</small></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 4. TV Brand & Optional IP -->
-            <div class="w-step">
-              <div class="w-head"><span class="w-badge">4</span><h4>Qual é a sua TV?</h4></div>
-              <p class="w-desc">Se não souber o IP ainda, deixe em branco — o próprio Claude vai te ensinar exatamente onde clicar no controle remoto para ativar a depuração e achar o IP.</p>
-              <div class="w-row">
-                <select class="w-select" id="wizBrand" aria-label="Marca da TV">
-                  <option value="TCL (Google TV / Android TV)">TCL (Google TV / Android TV)</option>
-                  <option value="Outra Google TV / Android TV (Sony, Hisense, Philips, Xiaomi, Chromecast)">Outra Google TV / Android TV</option>
-                  <option value="Detectar automaticamente via ADB">Não sei — detectar automaticamente</option>
-                </select>
-                <input class="w-input" id="wizIp" type="text" placeholder="IP da TV (opcional, ex: 192.168.15.50)" aria-label="IP da TV opcional">
-              </div>
-            </div>
-
-            <!-- Generated Prompt -->
-            <div class="prompt-card">
+            <!-- Sticky Generated Prompt -->
+            <aside class="prompt-card" aria-label="Prompt gerado">
               <div class="prompt-bar">
-                <span>Prompt pronto para o seu Claude / Claude Code</span>
-                <button class="prompt-copy" id="wizCopyPrompt" type="button">Copiar Prompt para o Claude</button>
+                <span class="prompt-title">Prompt pronto pro Claude</span>
+                <button class="prompt-copy" id="wizCopyPrompt" type="button">Copiar Prompt</button>
               </div>
               <pre class="prompt-pre" id="wizPrompt"></pre>
-              <p class="prompt-hint">Depois de copiar, abra o terminal com o Claude Code (ou o chat do Claude no seu computador), cole esse texto e siga um passo de cada vez.</p>
-            </div>
+              <p class="prompt-hint">Cole no Claude Code (ou Claude no computador) e aperte Enter. Ele vai te guiar um passo curto por vez com o controle remoto na mão.</p>
+            </aside>
           </div>
         </div>
 
@@ -310,67 +220,143 @@
             <li><b>Ferramentas no Mac:</b>
               <div class="code"><code>brew install --cask temurin@17 android-commandlinetools android-platform-tools &amp;&amp; sdkmanager "build-tools;34.0.0" "platforms;android-34"</code><button class="copy-btn" type="button" aria-label="Copiar comando">Copiar</button></div>
             </li>
-            <li><b>Clonar e configurar:</b> copie <em>config.example.properties</em> para <em>config.properties</em> e escolha <em>team=</em>, <em>city=</em>, <em>weather_enabled=</em> e <em>ps5_hdmi_volume=</em>.
+            <li><b>Clonar este fork e compilar:</b> ajuste <em>team=</em>, <em>city=</em>, <em>weather_enabled=</em> e <em>ps5_hdmi_volume=</em> em <em>config.properties</em>.
               <div class="code"><code>git clone -b tcl-performance https://github.com/DIDIDXX/free-my-tv &amp;&amp; cd free-my-tv &amp;&amp; cp config.example.properties config.properties &amp;&amp; bash build.sh</code><button class="copy-btn" type="button" aria-label="Copiar comando">Copiar</button></div>
             </li>
-            <li><b>Instalar na TV:</b>
+            <li><b>Instalar via ADB:</b>
               <div class="code"><code>adb connect 192.168.15.50:5555 &amp;&amp; adb install -r FreeMyTV.apk</code><button class="copy-btn" type="button" aria-label="Copiar comando">Copiar</button></div>
             </li>
-            <li><b>Na TV:</b> abra <em>Free My TV</em> → <em>Início</em> → <em>Free My TV</em> e aceite o aviso de depuração (<em>Sempre permitir</em>).</li>
           </ol>
         </div>
       </div>
     </section>
 
-    <!-- Compatibility -->
-    <section class="section compat" id="compat">
+    <!-- What changed in this fork (Bento) -->
+    <section class="section features" id="features">
       <div class="head" data-reveal>
+        <p class="kicker">Diferenciais do Fork</p>
+        <h2>O que mudou em relação ao FreeMyTV original.</h2>
+        <p class="sub">Mantivemos a leveza e a elegância de <strong>simbasjungles/free-my-tv</strong>, resolvendo os gargalos práticos de uma TCL Android 11 no dia a dia.</p>
+      </div>
+
+      <div class="bento">
+        <article class="bento-card wide" data-reveal>
+          <div>
+            <span class="bento-num">01 / NAVEGAÇÃO &amp; HOME</span>
+            <h3>Aba Aplicativos em tela cheia + botão Home sem piscar a TCL.</h3>
+            <p>A antiga aba estática de Filmes deu lugar à grade 16:9 <em>Aplicativos</em> com todos os apps instalados na TV. E no Android 11, um serviço leve intercepta o botão Home para cair direto na nossa tela — sem mostrar a launcher antiga por um segundo antes.</p>
+          </div>
+          <div class="tv"><div class="screen"><video data-src="../assets/nav.mp4" poster="../assets/nav-poster.webp" muted loop playsinline preload="none" aria-label="Navegação na prateleira e abas de aplicativos"></video></div></div>
+        </article>
+
+        <article class="bento-card" data-reveal>
+          <div>
+            <span class="bento-num">02 / CLUBE AO VIVO</span>
+            <h3>Seu time atualizado sozinho (Série A + Copas).</h3>
+            <p>Corrigimos a agenda travada e a busca incompleta: agora puxa Brasileirão e Libertadores em tempo real, marca jogos <em>AO VIVO</em>, converte horários para seu fuso local e abre melhores momentos direto no YouTube/SmartTube.</p>
+          </div>
+          <div class="tv"><div class="screen"><img src="../assets/club-tab.webp" alt="Aba Flamengo com tabela 2026, últimos jogos e próximos jogos" loading="lazy"></div></div>
+        </article>
+
+        <article class="bento-card" data-reveal>
+          <div>
+            <span class="bento-num">03 / DESEMPENHO</span>
+            <h3>Gaveta de clima e cotações em 60 fps reais.</h3>
+            <p>Renderização com camadas em cache reduz drasticamente o trabalho da GPU em hardware modesto. Aperte para baixo para ver previsão e moedas (ou desative o clima na compilação).</p>
+            <div class="hud" aria-hidden="true"><i></i><b>60 FPS</b><svg viewBox="0 0 120 24" preserveAspectRatio="none"><polyline id="spark" fill="none" points=""/></svg><span>10 ms p95</span></div>
+          </div>
+          <div class="tv"><div class="screen"><video data-src="../assets/drawer.mp4" poster="../assets/drawer-poster.webp" muted loop playsinline preload="none" aria-label="Gaveta inferior com clima e cotações"></video></div></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Before / After -->
+    <section class="section compare" id="compare">
+      <div class="head center" data-reveal>
+        <p class="kicker">Antes → depois</p>
+        <h2>Zero banners. Mesmos aplicativos.</h2>
+        <p class="sub">Arraste a barra central para comparar a tela cheia de recomendações pagas com a interface limpa do launcher.</p>
+      </div>
+      <div class="tv ba" id="ba" data-reveal tabindex="0" role="slider" aria-label="Compare a tela inicial de fábrica com o Free My TV" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <div class="screen">
+          <img class="after" src="../assets/home-day.webp" alt="Tela inicial limpa do Free My TV" loading="lazy">
+          <div class="before-wrap"><img class="before" src="../assets/before.webp" alt="Tela de fábrica repleta de fileiras patrocinadas" loading="lazy"></div>
+          <span class="tag tag-l">Tela original <em>(ilustração)</em></span>
+          <span class="tag tag-r">Free My TV</span>
+          <div class="handle" aria-hidden="true"><span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sunset Scroll Showcase -->
+    <section class="sunset" id="sunset" aria-label="Claro de dia, escuro à noite">
+      <div class="sticky">
+        <div class="stars" aria-hidden="true"></div>
+        <div class="sun" aria-hidden="true"></div>
+        <div class="moon" aria-hidden="true"></div>
+        <div class="head">
+          <p class="kicker"><span class="clock" id="sunClock">17:20</span> · pôr do sol automático</p>
+          <h2>Claro de dia. Escuro à noite.</h2>
+          <p class="sub">Quando o clima está ativado, a interface segue o nascer e pôr do sol da cidade que você escolher no configurador.</p>
+        </div>
+        <div class="tv"><div class="screen">
+          <img src="../assets/day.webp" alt="Tela inicial em modo diurno" loading="lazy">
+          <img class="night" src="../assets/night.webp" alt="Mesma tela inicial em modo noturno" loading="lazy">
+        </div></div>
+      </div>
+    </section>
+
+    <!-- Numbers -->
+    <section class="section numbers" id="numbers">
+      <div class="head center" data-reveal>
+        <p class="kicker">Medido em hardware real</p>
+        <h2>Mais fôlego na TCL Android 11.</h2>
+        <p class="sub">Comparativo via <em>dumpsys gfxinfo</em> e <em>meminfo</em> antes e depois das otimizações do fork.</p>
+      </div>
+      <div class="cards">
+        <div class="card" data-reveal><b class="big grad-mint"><span data-count="10">0</span><small>ms p95</small></b><h4>Fluidez real</h4><p>Quadros travados (janky frames) caíram de 49,84% para 1,02% ao navegar pelas fileiras.</p></div>
+        <div class="card" data-reveal><b class="big grad-mint">−<span data-count="63">0</span>%</b><h4>Memória PSS</h4>
+          <div class="bars"><div><span>Antes</span><i style="--w:100%"></i><em>321 MB</em></div><div><span>Depois</span><i style="--w:37%"></i><em>117 MB</em></div></div>
+        </div>
+        <div class="card" data-reveal><b class="big grad-sun">0</b><h4>Anúncios</h4><p>Nenhum banner patrocinado e suporte opcional a DNS Privado AdGuard na instalação.</p></div>
+      </div>
+    </section>
+
+    <!-- Compatibility & FAQ -->
+    <section class="section compat" id="compat">
+      <div class="head center" data-reveal>
         <p class="kicker">Compatibilidade</p>
-        <h2>Funciona com qualquer TV com Google TV ou Android TV.</h2>
-        <p class="sub">Testado inclusive em TCL com Android 11 (API 30) e Android 12–14+. TVs Samsung ou LG ganham o mesmo visual usando um dongle Google TV no HDMI.</p>
+        <h2>Android TV 11+ e Google TV.</h2>
+        <p class="sub">Validado em TCL Android 11 e compatível com Sony, Hisense, Philips, Xiaomi, Chromecast e Shield.</p>
       </div>
       <div class="chips" data-reveal>
-        <span class="chip ok">Google TV</span><span class="chip ok">Android TV 11+</span><span class="chip ok">TCL</span><span class="chip ok">Sony</span>
-        <span class="chip ok">Hisense</span><span class="chip ok">Philips</span><span class="chip ok">Xiaomi / Mi Box</span><span class="chip ok">Chromecast with Google TV</span>
-        <span class="chip ok">NVIDIA Shield</span><span class="chip ok">onn 4K</span>
+        <span class="chip ok">TCL Android 11</span><span class="chip ok">Google TV</span><span class="chip ok">Sony</span>
+        <span class="chip ok">Hisense</span><span class="chip ok">Philips</span><span class="chip ok">Xiaomi / Mi Box</span>
+        <span class="chip ok">Chromecast Google TV</span><span class="chip ok">NVIDIA Shield</span>
       </div>
-      <p class="note" data-reveal>Outra marca ou versão? O prompt acima orienta o Claude a ler sua TV via ADB e adaptar o necessário automaticamente.</p>
     </section>
 
-    <!-- FAQ -->
     <section class="section faq" id="faq">
-      <div class="head" data-reveal>
+      <div class="head center" data-reveal>
         <p class="kicker">Dúvidas</p>
-        <h2>Boas perguntas.</h2>
+        <h2>Perguntas rápidas.</h2>
       </div>
       <div class="qs" data-reveal>
-        <details><summary>Preciso saber programar para usar o prompt?</summary><p>Não. Justamente por isso existe o configurador acima: você escolhe seu time, cidade e preferências com cliques, copia o prompt e cola no Claude. Ele pergunta tudo uma coisinha de cada vez ("pegue o controle, vá em Configurações...").</p></details>
-        <details><summary>É seguro? Posso estragar a TV?</summary><p>Ele usa apenas comandos oficiais de desenvolvedor do Android (sem root, sem apagar aplicativos). Se você quiser desfazer, o botão <em>Original</em> devolve exatamente a tela de fábrica e todos os apps. Se a tela nova falhar 3 vezes seguidas em 5 minutos, o Watchdog volta ao original sozinho.</p></details>
-        <details><summary>Funciona em TCL com Android 11 antigo?</summary><p>Sim — esse fork nasceu exatamente otimizando uma TCL Android 11. O app reduz drasticamente o trabalho da GPU e usa uma ponte leve para o botão Home funcionar instantaneamente sem piscar a tela antiga.</p></details>
-        <details><summary>E se eu não quiser aba de futebol nem previsão do tempo?</summary><p>Basta escolher <em>Desativado</em> no time e desmarcar o clima no formulário acima. A barra superior fica só com Explorar, Aplicativos e Séries, e o app não faz nenhuma requisição de clima.</p></details>
-        <details><summary>Ele coleta algum dado meu?</summary><p>Não. Sem conta, sem analytics, sem servidor próprio. A TV fala direto apenas com ESPN (se você ativar um time), Open-Meteo (se ativar o clima), Binance (cotações) e TMDB (se colocar sua própria chave).</p></details>
-        <details><summary>Muda a qualidade de imagem da TV?</summary><p>Não. Ajustes de imagem, HDR, som e apps de vídeo rodam normalmente no hardware da TV.</p></details>
-      </div>
-    </section>
-
-    <!-- Final CTA -->
-    <section class="final" data-reveal>
-      <h2>Liberte sua TV hoje.</h2>
-      <p class="sub">Código aberto, dez minutos guiados pelo Claude, um botão para desfazer.</p>
-      <div class="cta">
-        <a class="btn btn-dark" href="#install">Gerar meu prompt <span aria-hidden="true">→</span></a>
-        <a class="btn btn-glass" href="https://github.com/DIDIDXX/free-my-tv" rel="noopener">Ver código no GitHub</a>
+        <details><summary>Preciso saber programar para instalar?</summary><p>Não. Basta marcar suas escolhas no configurador lá em cima, copiar o prompt pronto e colar no Claude Code. Ele orienta cada passo no controle remoto.</p></details>
+        <details><summary>Posso desfazer tudo se não gostar?</summary><p>Sim. Nada é apagado da TV — pacotes originais são apenas desativados de forma reversível, e o botão <em>Original</em> dentro do próprio app restaura tudo como veio de fábrica.</p></details>
+        <details><summary>E se eu não quiser aba de futebol nem previsão do tempo?</summary><p>Escolha <em>Desativado</em> na etapa 1 e desmarque o clima na etapa 2. Seu APK é compilado sem a aba do clube e sem requisições de clima.</p></details>
+        <details><summary>Qual a relação com o FreeMyTV original?</summary><p>Este repositório é um fork aberto de <em>simbasjungles/free-my-tv</em> focado em performance para TCL Android 11, eliminação do flash no botão Home, grade completa de Aplicativos, suporte aos 20 clubes da Série A e onboarding via prompt.</p></details>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <div class="brand"><img src="../assets/icon-512.png" alt="" width="24" height="24"><span>Free My TV</span></div>
-    <p>Fork TCL Performance &amp; Club Dashboard por <a href="https://github.com/DIDIDXX/free-my-tv" rel="noopener">DIDIDXX</a>, baseado em <a href="https://github.com/simbasjungles/free-my-tv" rel="noopener">simbasjungles/free-my-tv</a>. Licença MIT. Sem afiliação com Google, TCL, ESPN ou clubes.</p>
-    <p>Dados: ESPN, Open-Meteo.com (CC BY 4.0), Binance e TMDB (quando configurado). Ícones: Material Symbols. Fonte: Inter.</p>
+    <div class="brand"><img src="../assets/icon-512.png" alt="" width="24" height="24"><span>Free My TV · Fork TCL</span></div>
+    <p>Fork mantido em <a href="https://github.com/DIDIDXX/free-my-tv" rel="noopener">DIDIDXX/free-my-tv</a> · Projeto original por <a href="https://github.com/simbasjungles/free-my-tv" rel="noopener">simbasjungles/free-my-tv</a> (<a href="https://freemytv.io/pt/" rel="noopener">freemytv.io</a>) · Licença MIT.</p>
+    <p>Dados públicos: ESPN, Open-Meteo.com (CC BY 4.0), Binance e TMDB (opcional). Sem afiliação com Google, TCL, ESPN ou clubes.</p>
   </footer>
 
-  <dialog class="film" id="film" aria-label="O filme do Free My TV">
+  <dialog class="film" id="film" aria-label="Vídeo de demonstração do Free My TV">
     <button class="close" type="button" aria-label="Fechar">×</button>
     <video controls playsinline preload="none" poster="../assets/film-poster.webp"><source src="../assets/film.mp4" type="video/mp4"></video>
   </dialog>
